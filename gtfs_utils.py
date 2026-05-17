@@ -1,5 +1,7 @@
 import csv
 import os
+import zipfile
+import io
 
 
 GTFS_DIR = "gtfs"
@@ -7,7 +9,11 @@ GTFS_DIR = "gtfs"
 STOPS_FILE = os.path.join(GTFS_DIR, "stops.txt")
 TRIPS_FILE = os.path.join(GTFS_DIR, "trips.txt")
 ROUTES_FILE = os.path.join(GTFS_DIR, "routes.txt")
-STOP_TIMES_FILE = os.path.join(GTFS_DIR, "stop_times.txt")
+
+STOP_TIMES_ZIP_FILE = os.path.join(
+    GTFS_DIR,
+    "stop_times.txt.zip"
+)
 
 
 ROUTE_IDS = {
@@ -36,6 +42,16 @@ def read_csv_dict(path):
         return list(csv.DictReader(f))
 
 
+def read_csv_dict_from_zip(zip_path, inner_name):
+    if not os.path.exists(zip_path):
+        return []
+
+    with zipfile.ZipFile(zip_path) as z:
+        with z.open(inner_name) as f:
+            text = io.TextIOWrapper(f, encoding="utf-8-sig")
+            return list(csv.DictReader(text))
+
+
 def normalize_stop_id(stop_id):
     if not stop_id:
         return ""
@@ -45,6 +61,7 @@ def normalize_stop_id(stop_id):
 
 def load_stops():
     rows = read_csv_dict(STOPS_FILE)
+
     stops = {}
     stop_name_to_ids = {}
 
@@ -56,6 +73,7 @@ def load_stops():
             stops[stop_id] = stop_name
 
             base_id = normalize_stop_id(stop_id)
+
             if base_id:
                 stops[base_id] = stop_name
 
@@ -64,7 +82,10 @@ def load_stops():
 
             stop_name_to_ids[stop_name].append(stop_id)
 
-            if base_id and base_id not in stop_name_to_ids[stop_name]:
+            if (
+                base_id
+                and base_id not in stop_name_to_ids[stop_name]
+            ):
                 stop_name_to_ids[stop_name].append(base_id)
 
     return stops, stop_name_to_ids
@@ -72,6 +93,7 @@ def load_stops():
 
 def load_trips():
     rows = read_csv_dict(TRIPS_FILE)
+
     trips = {}
 
     for row in rows:
@@ -92,6 +114,7 @@ def load_trips():
 
 def load_routes():
     rows = read_csv_dict(ROUTES_FILE)
+
     routes = {}
 
     for row in rows:
@@ -109,7 +132,11 @@ def load_routes():
 
 
 def load_stop_times():
-    rows = read_csv_dict(STOP_TIMES_FILE)
+    rows = read_csv_dict_from_zip(
+        STOP_TIMES_ZIP_FILE,
+        "stop_times.txt"
+    )
+
     stop_times_by_trip = {}
 
     for row in rows:
@@ -146,14 +173,6 @@ ROUTES = load_routes()
 STOP_TIMES_BY_TRIP = load_stop_times()
 
 
-def attach_stop_names():
-    for trip_id, stop_times in STOP_TIMES_BY_TRIP.items():
-        for item in stop_times:
-            item["stop_name"] = get_stop_name(item.get("stop_id", ""))
-
-        stop_times.sort(key=lambda x: x.get("stop_sequence", 999999))
-
-
 def get_stop_name(stop_id):
     if not stop_id:
         return "接近中"
@@ -167,6 +186,18 @@ def get_stop_name(stop_id):
         return STOPS[base_stop_id]
 
     return "接近中"
+
+
+def attach_stop_names():
+    for trip_id, stop_times in STOP_TIMES_BY_TRIP.items():
+        for item in stop_times:
+            item["stop_name"] = get_stop_name(
+                item.get("stop_id", "")
+            )
+
+        stop_times.sort(
+            key=lambda x: x.get("stop_sequence", 999999)
+        )
 
 
 attach_stop_names()
@@ -196,7 +227,6 @@ def is_kameido_direction(trip_id):
     trip = get_trip_info(trip_id)
 
     headsign = trip.get("trip_headsign", "")
-    direction_id = trip.get("direction_id", "")
 
     if "亀戸" in headsign:
         return True
@@ -245,76 +275,23 @@ def find_stop_index_by_name(stops, stop_name):
     return None
 
 
-def get_remaining_stop_count(trip_id, current_stop_id, target_stop_name=TARGET_STOP_NAME):
-    stops = get_trip_stops(trip_id)
-
-    if not stops:
-        return None
-
-    current_index = find_stop_index_by_stop_id(stops, current_stop_id)
-    target_index = find_stop_index_by_name(stops, target_stop_name)
-
-    if current_index is None or target_index is None:
-        return None
-
-    remaining = target_index - current_index
-
-    return remaining
-
-
-def get_bus_location_status(trip_id, current_stop_id, target_stop_name=TARGET_STOP_NAME):
-    stops = get_trip_stops(trip_id)
-    current_stop_name = get_stop_name(current_stop_id)
-
-    if not stops:
-        return {
-            "current_stop_name": current_stop_name,
-            "remaining_stop_count": None,
-            "status_text": "接近中",
-            "progress_stops": [],
-        }
-
-    current_index = find_stop_index_by_stop_id(stops, current_stop_id)
-    target_index = find_stop_index_by_name(stops, target_stop_name)
-
-    if current_index is None or target_index is None:
-        return {
-            "current_stop_name": current_stop_name,
-            "remaining_stop_count": None,
-            "status_text": "接近中",
-            "progress_stops": build_progress_stops(stops, current_index, target_index),
-        }
-
-    remaining = target_index - current_index
-
-    if remaining > 1:
-        status_text = f"あと{remaining}停留所"
-    elif remaining == 1:
-        status_text = "次の停留所"
-    elif remaining == 0:
-        status_text = "まもなく到着"
-    else:
-        status_text = "通過済み"
-
-    return {
-        "current_stop_name": current_stop_name,
-        "remaining_stop_count": remaining,
-        "status_text": status_text,
-        "progress_stops": build_progress_stops(stops, current_index, target_index),
-    }
-
-
-def build_progress_stops(stops, current_index, target_index, window=2):
+def build_progress_stops(
+    stops,
+    current_index,
+    target_index,
+    window=2
+):
     if not stops:
         return []
 
     if current_index is None and target_index is None:
         return []
 
-    if current_index is None:
-        center = target_index
-    else:
-        center = current_index
+    center = (
+        current_index
+        if current_index is not None
+        else target_index
+    )
 
     if center is None:
         return []
@@ -326,12 +303,19 @@ def build_progress_stops(stops, current_index, target_index, window=2):
 
     for index in range(start, end):
         item = stops[index]
+
         role = "normal"
 
-        if current_index is not None and index == current_index:
+        if (
+            current_index is not None
+            and index == current_index
+        ):
             role = "current"
 
-        if target_index is not None and index == target_index:
+        if (
+            target_index is not None
+            and index == target_index
+        ):
             role = "target"
 
         if (
@@ -351,7 +335,102 @@ def build_progress_stops(stops, current_index, target_index, window=2):
     return result
 
 
-def find_nearest_scheduled_bus(buses, route_key, now_minutes):
+def get_remaining_stop_count(
+    trip_id,
+    current_stop_id,
+    target_stop_name=TARGET_STOP_NAME
+):
+    stops = get_trip_stops(trip_id)
+
+    if not stops:
+        return None
+
+    current_index = find_stop_index_by_stop_id(
+        stops,
+        current_stop_id
+    )
+
+    target_index = find_stop_index_by_name(
+        stops,
+        target_stop_name
+    )
+
+    if current_index is None or target_index is None:
+        return None
+
+    return target_index - current_index
+
+
+def get_bus_location_status(
+    trip_id,
+    current_stop_id,
+    target_stop_name=TARGET_STOP_NAME
+):
+    stops = get_trip_stops(trip_id)
+
+    current_stop_name = get_stop_name(current_stop_id)
+
+    if not stops:
+        return {
+            "current_stop_name": current_stop_name,
+            "remaining_stop_count": None,
+            "status_text": "接近中",
+            "progress_stops": [],
+        }
+
+    current_index = find_stop_index_by_stop_id(
+        stops,
+        current_stop_id
+    )
+
+    target_index = find_stop_index_by_name(
+        stops,
+        target_stop_name
+    )
+
+    if current_index is None or target_index is None:
+        return {
+            "current_stop_name": current_stop_name,
+            "remaining_stop_count": None,
+            "status_text": "接近中",
+            "progress_stops": build_progress_stops(
+                stops,
+                current_index,
+                target_index,
+            ),
+        }
+
+    remaining = target_index - current_index
+
+    if remaining > 1:
+        status_text = f"あと{remaining}停留所"
+
+    elif remaining == 1:
+        status_text = "次の停留所"
+
+    elif remaining == 0:
+        status_text = "まもなく到着"
+
+    else:
+        status_text = "通過済み"
+
+    return {
+        "current_stop_name": current_stop_name,
+        "remaining_stop_count": remaining,
+        "status_text": status_text,
+        "progress_stops": build_progress_stops(
+            stops,
+            current_index,
+            target_index,
+        ),
+    }
+
+
+def find_nearest_scheduled_bus(
+    buses,
+    route_key,
+    now_minutes
+):
     candidates = []
 
     for bus in buses:
@@ -389,8 +468,12 @@ def get_debug_status():
         "trips_loaded": len(TRIPS),
         "routes_loaded": len(ROUTES),
         "stop_times_trips_loaded": len(STOP_TIMES_BY_TRIP),
+
         "stops_file_exists": os.path.exists(STOPS_FILE),
         "trips_file_exists": os.path.exists(TRIPS_FILE),
         "routes_file_exists": os.path.exists(ROUTES_FILE),
-        "stop_times_file_exists": os.path.exists(STOP_TIMES_FILE),
+
+        "stop_times_zip_exists": os.path.exists(
+            STOP_TIMES_ZIP_FILE
+        ),
     }
