@@ -1,13 +1,25 @@
 from flask import Flask, render_template, jsonify
 from datetime import datetime, timedelta, timezone
+import os
+import math
+import requests
 import jpholiday
+from google.transit import gtfs_realtime_pb2
 
 app = Flask(__name__)
 
 JST = timezone(timedelta(hours=9))
 
+ODPT_API_KEY = os.environ.get("ODPT_API_KEY")
+ODPT_REALTIME_URL = "https://api.odpt.org/api/v4/gtfs/realtime/ToeiBus"
+
 STOP_NAME = "亀戸七丁目"
 DESTINATION = "亀戸駅前"
+
+# 亀戸七丁目あたり。route_id特定用なのでざっくりでOK
+TARGET_LAT = 35.6990
+TARGET_LON = 139.8400
+SEARCH_RADIUS_KM = 3.0
 
 ROUTES = {
     "all": "すべて",
@@ -230,6 +242,7 @@ def get_remaining_buses(route_key):
         times = route.get(day_type, [])
 
         for t in times:
+            # 時刻表時刻 + 15分までは表示
             if time_to_minutes(t) + 15 >= now_minutes:
                 buses.append({
                     "time": t,
@@ -249,6 +262,101 @@ def get_remaining_buses(route_key):
     }
 
 
+def distance_km(lat1, lon1, lat2, lon2):
+    r = 6371.0
+
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(lat1_rad)
+        * math.cos(lat2_rad)
+        * math.sin(dlon / 2) ** 2
+    )
+
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return r * c
+
+
+def fetch_toei_realtime():
+    if not ODPT_API_KEY:
+        return {
+            "ok": False,
+            "reason": "ODPT_API_KEY が未設定です",
+            "vehicles": [],
+        }
+
+    try:
+        res = requests.get(
+            ODPT_REALTIME_URL,
+            params={"acl:consumerKey": ODPT_API_KEY},
+            timeout=10,
+        )
+        res.raise_for_status()
+
+        feed = gtfs_realtime_pb2.FeedMessage()
+        feed.ParseFromString(res.content)
+
+        vehicles = []
+
+        for entity in feed.entity:
+            if not entity.HasField("vehicle"):
+                continue
+
+            vehicle = entity.vehicle
+
+            trip_id = vehicle.trip.trip_id if vehicle.trip.trip_id else ""
+            route_id = vehicle.trip.route_id if vehicle.trip.route_id else ""
+            vehicle_id = vehicle.vehicle.id if vehicle.vehicle.id else ""
+            stop_id = vehicle.stop_id if vehicle.stop_id else ""
+
+            lat = None
+            lon = None
+
+            if vehicle.HasField("position"):
+                lat = vehicle.position.latitude
+                lon = vehicle.position.longitude
+
+            item = {
+                "entity_id": entity.id,
+                "trip_id": trip_id,
+                "route_id": route_id,
+                "vehicle_id": vehicle_id,
+                "stop_id": stop_id,
+                "latitude": lat,
+                "longitude": lon,
+                "distance_km": None,
+            }
+
+            if lat is not None and lon is not None:
+                item["distance_km"] = round(
+                    distance_km(TARGET_LAT, TARGET_LON, lat, lon),
+                    3,
+                )
+
+            vehicles.append(item)
+
+        return {
+            "ok": True,
+            "reason": "",
+            "vehicles": vehicles,
+        }
+
+    except Exception as e:
+        return {
+            "ok": False,
+            "reason": str(e),
+            "vehicles": [],
+        }
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -260,6 +368,74 @@ def buses(route_key):
         return jsonify({"error": "invalid route"}), 404
 
     return jsonify(get_remaining_buses(route_key))
+
+
+@app.route("/api/realtime-debug")
+def realtime_debug():
+    realtime = fetch_toei_realtime()
+    vehicles = realtime.get("vehicles", [])
+
+    nearby = [
+        v for v in vehicles
+        if v.get("distance_km") is not None
+        and v["distance_km"] <= SEARCH_RADIUS_KM
+    ]
+
+    nearby.sort(
+        key=lambda x: x["distance_km"]
+        if x.get("distance_km") is not None
+        else 9999
+    )
+
+    route_summary = {}
+
+    for v in nearby:
+        route_id = v.get("route_id") or "unknown"
+
+        if route_id not in route_summary:
+            route_summary[route_id] = {
+                "route_id": route_id,
+                "count": 0,
+                "vehicles": [],
+            }
+
+        route_summary[route_id]["count"] += 1
+        route_summary[route_id]["vehicles"].append(v)
+
+    return jsonify({
+        "ok": realtime["ok"],
+        "reason": realtime["reason"],
+        "target": {
+            "name": STOP_NAME,
+            "latitude": TARGET_LAT,
+            "longitude": TARGET_LON,
+            "search_radius_km": SEARCH_RADIUS_KM,
+        },
+        "all_count": len(vehicles),
+        "nearby_count": len(nearby),
+        "nearby_sample": nearby[:40],
+        "route_summary": list(route_summary.values()),
+    })
+
+
+@app.route("/api/realtime-debug/all")
+def realtime_debug_all():
+    realtime = fetch_toei_realtime()
+    vehicles = realtime.get("vehicles", [])
+
+    vehicles_sorted = sorted(
+        vehicles,
+        key=lambda x: x["distance_km"]
+        if x.get("distance_km") is not None
+        else 9999
+    )
+
+    return jsonify({
+        "ok": realtime["ok"],
+        "reason": realtime["reason"],
+        "all_count": len(vehicles),
+        "sample": vehicles_sorted[:100],
+    })
 
 
 if __name__ == "__main__":
