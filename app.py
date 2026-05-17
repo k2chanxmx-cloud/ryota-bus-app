@@ -6,6 +6,15 @@ import requests
 import jpholiday
 from google.transit import gtfs_realtime_pb2
 
+from gtfs_utils import (
+    ROUTE_IDS,
+    get_stop_name,
+    get_route_label,
+    get_direction_label,
+    is_target_direction,
+    get_debug_status,
+)
+
 app = Flask(__name__)
 
 JST = timezone(timedelta(hours=9))
@@ -16,10 +25,11 @@ ODPT_REALTIME_URL = "https://api.odpt.org/api/v4/gtfs/realtime/ToeiBus"
 STOP_NAME = "亀戸七丁目"
 DESTINATION = "亀戸駅前"
 
-# 亀戸七丁目あたり。route_id特定用なのでざっくりでOK
 TARGET_LAT = 35.6990
 TARGET_LON = 139.8400
-SEARCH_RADIUS_KM = 3.0
+SEARCH_RADIUS_KM = 3.5
+
+DISPLAY_GRACE_MINUTES = 15
 
 ROUTES = {
     "all": "すべて",
@@ -225,43 +235,6 @@ def time_to_minutes(t):
     return h * 60 + m
 
 
-def get_remaining_buses(route_key):
-    now = datetime.now(JST)
-    now_minutes = now.hour * 60 + now.minute
-    day_type = get_day_type()
-
-    buses = []
-
-    if route_key == "all":
-        target_routes = BUS_TIMES.keys()
-    else:
-        target_routes = [route_key]
-
-    for key in target_routes:
-        route = BUS_TIMES[key]
-        times = route.get(day_type, [])
-
-        for t in times:
-            # 時刻表時刻 + 15分までは表示
-            if time_to_minutes(t) + 15 >= now_minutes:
-                buses.append({
-                    "time": t,
-                    "route": route["label"],
-                    "route_key": key,
-                })
-
-    buses.sort(key=lambda x: time_to_minutes(x["time"]))
-
-    return {
-        "stop": STOP_NAME,
-        "destination": DESTINATION,
-        "route": ROUTES.get(route_key, "すべて"),
-        "day_type": day_type,
-        "now": now.strftime("%H:%M"),
-        "buses": buses,
-    }
-
-
 def distance_km(lat1, lon1, lat2, lon2):
     r = 6371.0
 
@@ -283,6 +256,42 @@ def distance_km(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
     return r * c
+
+
+def get_remaining_buses(route_key):
+    now = datetime.now(JST)
+    now_minutes = now.hour * 60 + now.minute
+    day_type = get_day_type()
+
+    buses = []
+
+    if route_key == "all":
+        target_routes = BUS_TIMES.keys()
+    else:
+        target_routes = [route_key]
+
+    for key in target_routes:
+        route = BUS_TIMES[key]
+        times = route.get(day_type, [])
+
+        for t in times:
+            if time_to_minutes(t) + DISPLAY_GRACE_MINUTES >= now_minutes:
+                buses.append({
+                    "time": t,
+                    "route": route["label"],
+                    "route_key": key,
+                })
+
+    buses.sort(key=lambda x: time_to_minutes(x["time"]))
+
+    return {
+        "stop": STOP_NAME,
+        "destination": DESTINATION,
+        "route": ROUTES.get(route_key, "すべて"),
+        "day_type": day_type,
+        "now": now.strftime("%H:%M"),
+        "buses": buses,
+    }
 
 
 def fetch_toei_realtime():
@@ -328,8 +337,12 @@ def fetch_toei_realtime():
                 "entity_id": entity.id,
                 "trip_id": trip_id,
                 "route_id": route_id,
+                "route_key": None,
+                "route_label": "",
+                "direction": get_direction_label(trip_id),
                 "vehicle_id": vehicle_id,
                 "stop_id": stop_id,
+                "stop_name": get_stop_name(stop_id),
                 "latitude": lat,
                 "longitude": lon,
                 "distance_km": None,
@@ -340,6 +353,12 @@ def fetch_toei_realtime():
                     distance_km(TARGET_LAT, TARGET_LON, lat, lon),
                     3,
                 )
+
+            for key, target_route_id in ROUTE_IDS.items():
+                if route_id == target_route_id:
+                    item["route_key"] = key
+                    item["route_label"] = get_route_label(key)
+                    break
 
             vehicles.append(item)
 
@@ -357,6 +376,49 @@ def fetch_toei_realtime():
         }
 
 
+def get_realtime_buses(route_key):
+    realtime = fetch_toei_realtime()
+
+    if not realtime["ok"]:
+        return {
+            "ok": False,
+            "reason": realtime["reason"],
+            "vehicles": [],
+        }
+
+    vehicles = []
+
+    for v in realtime["vehicles"]:
+        if v.get("route_key") is None:
+            continue
+
+        if route_key != "all" and v.get("route_key") != route_key:
+            continue
+
+        if not is_target_direction(v.get("trip_id", "")):
+            continue
+
+        if v.get("distance_km") is None:
+            continue
+
+        if v["distance_km"] > SEARCH_RADIUS_KM:
+            continue
+
+        vehicles.append(v)
+
+    vehicles.sort(
+        key=lambda x: x["distance_km"]
+        if x.get("distance_km") is not None
+        else 9999
+    )
+
+    return {
+        "ok": True,
+        "reason": "",
+        "vehicles": vehicles,
+    }
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -368,6 +430,24 @@ def buses(route_key):
         return jsonify({"error": "invalid route"}), 404
 
     return jsonify(get_remaining_buses(route_key))
+
+
+@app.route("/api/realtime/<route_key>")
+def realtime(route_key):
+    if route_key != "all" and route_key not in BUS_TIMES:
+        return jsonify({"error": "invalid route"}), 404
+
+    result = get_realtime_buses(route_key)
+
+    return jsonify({
+        "stop": STOP_NAME,
+        "destination": DESTINATION,
+        "route": ROUTES.get(route_key, "すべて"),
+        "now": datetime.now(JST).strftime("%H:%M"),
+        "ok": result["ok"],
+        "reason": result["reason"],
+        "vehicles": result["vehicles"],
+    })
 
 
 @app.route("/api/realtime-debug")
@@ -405,6 +485,7 @@ def realtime_debug():
     return jsonify({
         "ok": realtime["ok"],
         "reason": realtime["reason"],
+        "gtfs": get_debug_status(),
         "target": {
             "name": STOP_NAME,
             "latitude": TARGET_LAT,
@@ -415,26 +496,6 @@ def realtime_debug():
         "nearby_count": len(nearby),
         "nearby_sample": nearby[:40],
         "route_summary": list(route_summary.values()),
-    })
-
-
-@app.route("/api/realtime-debug/all")
-def realtime_debug_all():
-    realtime = fetch_toei_realtime()
-    vehicles = realtime.get("vehicles", [])
-
-    vehicles_sorted = sorted(
-        vehicles,
-        key=lambda x: x["distance_km"]
-        if x.get("distance_km") is not None
-        else 9999
-    )
-
-    return jsonify({
-        "ok": realtime["ok"],
-        "reason": realtime["reason"],
-        "all_count": len(vehicles),
-        "sample": vehicles_sorted[:100],
     })
 
 
