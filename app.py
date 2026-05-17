@@ -230,7 +230,7 @@ def get_remaining_buses(route_key):
         times = route.get(day_type, [])
 
         for t in times:
-            if time_to_minutes(t) >= now_minutes:
+            if time_to_minutes(t) + 15 >= now_minutes:
                 buses.append({
                     "time": t,
                     "route": route["label"],
