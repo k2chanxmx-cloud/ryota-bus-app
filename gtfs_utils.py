@@ -3,18 +3,12 @@ import os
 import zipfile
 import io
 
-
 GTFS_DIR = "gtfs"
 
 STOPS_FILE = os.path.join(GTFS_DIR, "stops.txt")
 TRIPS_FILE = os.path.join(GTFS_DIR, "trips.txt")
 ROUTES_FILE = os.path.join(GTFS_DIR, "routes.txt")
-
-STOP_TIMES_ZIP_FILE = os.path.join(
-    GTFS_DIR,
-    "stop_times.txt.zip"
-)
-
+STOP_TIMES_ZIP_FILE = os.path.join(GTFS_DIR, "stop_times.txt.zip")
 
 ROUTE_IDS = {
     "kame26": "058",
@@ -22,155 +16,106 @@ ROUTE_IDS = {
     "nishi27": "092",
 }
 
-
 ROUTE_LABELS = {
     "kame26": "亀26",
     "nishi25": "錦25",
     "nishi27": "錦27",
 }
 
-
 TARGET_STOP_NAME = "亀戸七丁目"
 DESTINATION_NAME = "亀戸駅前"
-
-
-def read_csv_dict(path):
-    if not os.path.exists(path):
-        return []
-
-    with open(path, encoding="utf-8-sig", newline="") as f:
-        return list(csv.DictReader(f))
-
-
-def read_csv_dict_from_zip(zip_path, inner_name):
-    if not os.path.exists(zip_path):
-        return []
-
-    with zipfile.ZipFile(zip_path) as z:
-        with z.open(inner_name) as f:
-            text = io.TextIOWrapper(f, encoding="utf-8-sig")
-            return list(csv.DictReader(text))
 
 
 def normalize_stop_id(stop_id):
     if not stop_id:
         return ""
-
     return stop_id.split("-")[0]
 
 
+def read_csv_rows(path):
+    if not os.path.exists(path):
+        return
+
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            yield row
+
+
+def read_zip_csv_rows(zip_path, inner_name):
+    if not os.path.exists(zip_path):
+        return
+
+    with zipfile.ZipFile(zip_path) as z:
+        with z.open(inner_name) as f:
+            text = io.TextIOWrapper(f, encoding="utf-8-sig")
+            reader = csv.DictReader(text)
+            for row in reader:
+                yield row
+
+
 def load_stops():
-    rows = read_csv_dict(STOPS_FILE)
-
     stops = {}
-    stop_name_to_ids = {}
 
-    for row in rows:
+    for row in read_csv_rows(STOPS_FILE) or []:
         stop_id = row.get("stop_id", "")
         stop_name = row.get("stop_name", "")
 
-        if stop_id and stop_name:
-            stops[stop_id] = stop_name
+        if not stop_id or not stop_name:
+            continue
 
-            base_id = normalize_stop_id(stop_id)
+        stops[stop_id] = stop_name
+        stops[normalize_stop_id(stop_id)] = stop_name
 
-            if base_id:
-                stops[base_id] = stop_name
-
-            if stop_name not in stop_name_to_ids:
-                stop_name_to_ids[stop_name] = []
-
-            stop_name_to_ids[stop_name].append(stop_id)
-
-            if (
-                base_id
-                and base_id not in stop_name_to_ids[stop_name]
-            ):
-                stop_name_to_ids[stop_name].append(base_id)
-
-    return stops, stop_name_to_ids
+    return stops
 
 
 def load_trips():
-    rows = read_csv_dict(TRIPS_FILE)
-
     trips = {}
+    target_trip_ids = set()
 
-    for row in rows:
+    target_route_ids = set(ROUTE_IDS.values())
+
+    for row in read_csv_rows(TRIPS_FILE) or []:
         trip_id = row.get("trip_id", "")
         route_id = row.get("route_id", "")
-        trip_headsign = row.get("trip_headsign", "")
+        headsign = row.get("trip_headsign", "")
         direction_id = row.get("direction_id", "")
 
-        if trip_id:
-            trips[trip_id] = {
-                "route_id": route_id,
-                "trip_headsign": trip_headsign,
-                "direction_id": direction_id,
-            }
+        if not trip_id:
+            continue
 
-    return trips
+        trips[trip_id] = {
+            "route_id": route_id,
+            "trip_headsign": headsign,
+            "direction_id": direction_id,
+        }
+
+        if route_id in target_route_ids:
+            if "亀戸" in headsign or DESTINATION_NAME in headsign or "-1-" in trip_id:
+                target_trip_ids.add(trip_id)
+
+    return trips, target_trip_ids
 
 
 def load_routes():
-    rows = read_csv_dict(ROUTES_FILE)
-
     routes = {}
 
-    for row in rows:
+    for row in read_csv_rows(ROUTES_FILE) or []:
         route_id = row.get("route_id", "")
-        route_short_name = row.get("route_short_name", "")
-        route_long_name = row.get("route_long_name", "")
 
         if route_id:
             routes[route_id] = {
-                "route_short_name": route_short_name,
-                "route_long_name": route_long_name,
+                "route_short_name": row.get("route_short_name", ""),
+                "route_long_name": row.get("route_long_name", ""),
             }
 
     return routes
 
 
-def load_stop_times():
-    rows = read_csv_dict_from_zip(
-        STOP_TIMES_ZIP_FILE,
-        "stop_times.txt"
-    )
-
-    stop_times_by_trip = {}
-
-    for row in rows:
-        trip_id = row.get("trip_id", "")
-        stop_id = row.get("stop_id", "")
-        stop_sequence = row.get("stop_sequence", "")
-
-        if not trip_id or not stop_id:
-            continue
-
-        try:
-            seq = int(stop_sequence)
-        except Exception:
-            seq = 999999
-
-        if trip_id not in stop_times_by_trip:
-            stop_times_by_trip[trip_id] = []
-
-        stop_times_by_trip[trip_id].append({
-            "stop_id": stop_id,
-            "base_stop_id": normalize_stop_id(stop_id),
-            "stop_name": "",
-            "stop_sequence": seq,
-            "arrival_time": row.get("arrival_time", ""),
-            "departure_time": row.get("departure_time", ""),
-        })
-
-    return stop_times_by_trip
-
-
-STOPS, STOP_NAME_TO_IDS = load_stops()
-TRIPS = load_trips()
+STOPS = load_stops()
+TRIPS, TARGET_TRIP_IDS = load_trips()
 ROUTES = load_routes()
-STOP_TIMES_BY_TRIP = load_stop_times()
 
 
 def get_stop_name(stop_id):
@@ -180,35 +125,52 @@ def get_stop_name(stop_id):
     if stop_id in STOPS:
         return STOPS[stop_id]
 
-    base_stop_id = normalize_stop_id(stop_id)
+    base_id = normalize_stop_id(stop_id)
 
-    if base_stop_id in STOPS:
-        return STOPS[base_stop_id]
+    if base_id in STOPS:
+        return STOPS[base_id]
 
     return "接近中"
 
 
-def attach_stop_names():
-    for trip_id, stop_times in STOP_TIMES_BY_TRIP.items():
-        for item in stop_times:
-            item["stop_name"] = get_stop_name(
-                item.get("stop_id", "")
-            )
+def load_stop_times():
+    stop_times_by_trip = {}
 
-        stop_times.sort(
+    for row in read_zip_csv_rows(STOP_TIMES_ZIP_FILE, "stop_times.txt") or []:
+        trip_id = row.get("trip_id", "")
+
+        if trip_id not in TARGET_TRIP_IDS:
+            continue
+
+        stop_id = row.get("stop_id", "")
+
+        if not stop_id:
+            continue
+
+        try:
+            seq = int(row.get("stop_sequence", "999999"))
+        except Exception:
+            seq = 999999
+
+        if trip_id not in stop_times_by_trip:
+            stop_times_by_trip[trip_id] = []
+
+        stop_times_by_trip[trip_id].append({
+            "stop_id": stop_id,
+            "base_stop_id": normalize_stop_id(stop_id),
+            "stop_name": get_stop_name(stop_id),
+            "stop_sequence": seq,
+        })
+
+    for trip_id in stop_times_by_trip:
+        stop_times_by_trip[trip_id].sort(
             key=lambda x: x.get("stop_sequence", 999999)
         )
 
+    return stop_times_by_trip
 
-attach_stop_names()
 
-
-def get_route_key_by_route_id(route_id):
-    for key, value in ROUTE_IDS.items():
-        if value == route_id:
-            return key
-
-    return None
+STOP_TIMES_BY_TRIP = load_stop_times()
 
 
 def get_route_label(route_key):
@@ -225,7 +187,6 @@ def get_trip_stops(trip_id):
 
 def is_kameido_direction(trip_id):
     trip = get_trip_info(trip_id)
-
     headsign = trip.get("trip_headsign", "")
 
     if "亀戸" in headsign:
@@ -243,7 +204,6 @@ def is_kameido_direction(trip_id):
 def get_direction_label(trip_id):
     if is_kameido_direction(trip_id):
         return "亀戸駅前方面"
-
     return "反対方面"
 
 
@@ -275,23 +235,11 @@ def find_stop_index_by_name(stops, stop_name):
     return None
 
 
-def build_progress_stops(
-    stops,
-    current_index,
-    target_index,
-    window=2
-):
+def build_progress_stops(stops, current_index, target_index, window=2):
     if not stops:
         return []
 
-    if current_index is None and target_index is None:
-        return []
-
-    center = (
-        current_index
-        if current_index is not None
-        else target_index
-    )
+    center = current_index if current_index is not None else target_index
 
     if center is None:
         return []
@@ -303,26 +251,18 @@ def build_progress_stops(
 
     for index in range(start, end):
         item = stops[index]
-
         role = "normal"
 
-        if (
-            current_index is not None
-            and index == current_index
-        ):
+        if current_index is not None and index == current_index:
             role = "current"
 
-        if (
-            target_index is not None
-            and index == target_index
-        ):
+        if target_index is not None and index == target_index:
             role = "target"
 
         if (
             current_index is not None
             and target_index is not None
-            and index > current_index
-            and index < target_index
+            and current_index < index < target_index
         ):
             role = "between"
 
@@ -335,39 +275,8 @@ def build_progress_stops(
     return result
 
 
-def get_remaining_stop_count(
-    trip_id,
-    current_stop_id,
-    target_stop_name=TARGET_STOP_NAME
-):
+def get_bus_location_status(trip_id, current_stop_id, target_stop_name=TARGET_STOP_NAME):
     stops = get_trip_stops(trip_id)
-
-    if not stops:
-        return None
-
-    current_index = find_stop_index_by_stop_id(
-        stops,
-        current_stop_id
-    )
-
-    target_index = find_stop_index_by_name(
-        stops,
-        target_stop_name
-    )
-
-    if current_index is None or target_index is None:
-        return None
-
-    return target_index - current_index
-
-
-def get_bus_location_status(
-    trip_id,
-    current_stop_id,
-    target_stop_name=TARGET_STOP_NAME
-):
-    stops = get_trip_stops(trip_id)
-
     current_stop_name = get_stop_name(current_stop_id)
 
     if not stops:
@@ -378,39 +287,25 @@ def get_bus_location_status(
             "progress_stops": [],
         }
 
-    current_index = find_stop_index_by_stop_id(
-        stops,
-        current_stop_id
-    )
-
-    target_index = find_stop_index_by_name(
-        stops,
-        target_stop_name
-    )
+    current_index = find_stop_index_by_stop_id(stops, current_stop_id)
+    target_index = find_stop_index_by_name(stops, target_stop_name)
 
     if current_index is None or target_index is None:
         return {
             "current_stop_name": current_stop_name,
             "remaining_stop_count": None,
             "status_text": "接近中",
-            "progress_stops": build_progress_stops(
-                stops,
-                current_index,
-                target_index,
-            ),
+            "progress_stops": build_progress_stops(stops, current_index, target_index),
         }
 
     remaining = target_index - current_index
 
     if remaining > 1:
         status_text = f"あと{remaining}停留所"
-
     elif remaining == 1:
         status_text = "次の停留所"
-
     elif remaining == 0:
         status_text = "まもなく到着"
-
     else:
         status_text = "通過済み"
 
@@ -418,29 +313,19 @@ def get_bus_location_status(
         "current_stop_name": current_stop_name,
         "remaining_stop_count": remaining,
         "status_text": status_text,
-        "progress_stops": build_progress_stops(
-            stops,
-            current_index,
-            target_index,
-        ),
+        "progress_stops": build_progress_stops(stops, current_index, target_index),
     }
 
 
-def find_nearest_scheduled_bus(
-    buses,
-    route_key,
-    now_minutes
-):
+def find_nearest_scheduled_bus(buses, route_key, now_minutes):
     candidates = []
 
     for bus in buses:
         if bus.get("route_key") != route_key:
             continue
 
-        time_text = bus.get("time", "")
-
         try:
-            h, m = map(int, time_text.split(":"))
+            h, m = map(int, bus.get("time", "").split(":"))
         except Exception:
             continue
 
@@ -450,7 +335,6 @@ def find_nearest_scheduled_bus(
         if -15 <= diff <= 30:
             candidates.append({
                 "bus": bus,
-                "diff": diff,
                 "abs_diff": abs(diff),
             })
 
@@ -466,14 +350,11 @@ def get_debug_status():
     return {
         "stops_loaded": len(STOPS),
         "trips_loaded": len(TRIPS),
+        "target_trips_loaded": len(TARGET_TRIP_IDS),
         "routes_loaded": len(ROUTES),
         "stop_times_trips_loaded": len(STOP_TIMES_BY_TRIP),
-
         "stops_file_exists": os.path.exists(STOPS_FILE),
         "trips_file_exists": os.path.exists(TRIPS_FILE),
         "routes_file_exists": os.path.exists(ROUTES_FILE),
-
-        "stop_times_zip_exists": os.path.exists(
-            STOP_TIMES_ZIP_FILE
-        ),
+        "stop_times_zip_exists": os.path.exists(STOP_TIMES_ZIP_FILE),
     }
