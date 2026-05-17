@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>亀戸七丁目バス</title>
+
+  <link rel="manifest" href="/static/manifest.json" />
+  <meta name="theme-color" content="#eaf7ff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="亀戸七丁目バス" />
+  <link rel="apple-touch-icon" href="/static/icon-512.png" />
+
+  <style>
+    :root {
+      --bg: #eaf7ff;
+      --card: rgba(255, 255, 255, 0.92);
+      --text: #243447;
+      --sub: #6b8299;
+      --main: #2f80ed;
+      --main-soft: #d8ecff;
+      --accent: #00a7c8;
+      --border: rgba(47, 128, 237, 0.16);
+      --shadow: 0 18px 40px rgba(38, 92, 140, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background:
+        radial-gradient(circle at top left, #c9efff 0, transparent 32%),
+        radial-gradient(circle at bottom right, #dbeafe 0, transparent 34%),
+        linear-gradient(180deg, #f7fcff 0%, var(--bg) 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 24px);
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .header-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      object-fit: cover;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(47, 128, 237, 0.18);
+    }
+
+    .small {
+      color: var(--sub);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    h1 {
+      margin: 2px 0 0;
+      font-size: 31px;
+      line-height: 1.15;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+
+    .card {
+      padding: 18px;
+      border-radius: 30px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 18px;
+      padding: 13px 8px;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--sub);
+      background: #eef7ff;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(47, 128, 237, 0.08);
+    }
+
+    .tab.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--main), var(--accent));
+      box-shadow: 0 10px 22px rgba(47, 128, 237, 0.24);
+    }
+
+    .info {
+      padding: 17px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #eaf6ff, #f8fdff);
+      border: 1px solid var(--border);
+    }
+
+    .stop {
+      color: var(--sub);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .direction {
+      margin-top: 5px;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+
+    .now {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--sub);
+    }
+
+    .next-box {
+      margin-top: 16px;
+      padding: 20px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, #0f3a66, #126a8a);
+      color: #fff;
+      box-shadow: 0 16px 32px rgba(18, 106, 138, 0.22);
+    }
+
+    .next-label {
+      font-size: 14px;
+      font-weight: 900;
+      opacity: 0.82;
+    }
+
+    .next-time {
+      margin-top: 4px;
+      font-size: 64px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+    }
+
+    .remaining {
+      margin-top: 12px;
+      font-size: 24px;
+      font-weight: 900;
+      color: #bdf3ff;
+    }
+
+    .count {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      opacity: 0.8;
+    }
+
+    .list {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .bus-card {
+      border-radius: 22px;
+      background: #fff;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(38, 92, 140, 0.08);
+    }
+
+    .bus-card:first-child {
+      border: 2px solid rgba(47, 128, 237, 0.65);
+      box-shadow: 0 14px 28px rgba(47, 128, 237, 0.16);
+    }
+
+    .bus-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 17px;
+    }
+
+    .bus-time {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.04em;
+    }
+
+    .bus-note {
+      text-align: right;
+      color: var(--sub);
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .route-badge {
+      display: inline-block;
+      margin-bottom: 5px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--main-soft);
+      color: var(--main);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .reload {
+      width: 100%;
+      margin-top: 16px;
+      border: 0;
+      border-radius: 20px;
+      padding: 15px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--main), var(--accent));
+      font-size: 16px;
+      font-weight: 900;
+      box-shadow: 0 12px 24px rgba(47, 128, 237, 0.22);
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+<main class="app">
+
+  <div class="app-header">
+    <img class="header-icon" src="/static/icon-512.png" alt="バス">
+    <div>
+      <div class="small">亀戸七丁目 → 亀戸駅前</div>
+      <h1>次のバス</h1>
+    </div>
+  </div>
+
+  <section class="card">
+
+    <div class="tabs">
+      <button id="btn-all" class="tab active" onclick="changeRoute('all')">すべて</button>
+      <button id="btn-nishi25" class="tab" onclick="changeRoute('nishi25')">錦25</button>
+      <button id="btn-nishi27" class="tab" onclick="changeRoute('nishi27')">錦27</button>
+      <button id="btn-kame26" class="tab" onclick="changeRoute('kame26')">亀26</button>
+    </div>
+
+    <div class="info">
+      <div id="stop" class="stop">亀戸七丁目</div>
+      <div id="direction" class="direction">亀戸駅前方面</div>
+      <div id="now" class="now">読み込み中...</div>
+    </div>
+
+    <div class="next-box">
+      <div class="next-label">いちばん近いバス</div>
+      <div id="nextTime" class="next-time">--:--</div>
+      <div id="remaining" class="remaining">--</div>
+      <div id="count" class="count">--</div>
+    </div>
+
+    <div id="list" class="list"></div>
+
+    <button class="reload" onclick="loadBuses()">
+      ⟳ 更新する
+    </button>
+
+  </section>
+
+</main>
+
+<script>
+let currentRoute = "all";
+
+function getDayTypeLabel(dayType) {
+  if (dayType === "weekday") return "平日";
+  if (dayType === "saturday") return "土曜";
+  if (dayType === "holiday") return "日曜/祝日";
+  return "";
+}
+
+function calcRemainingMinutes(busTime, nowTime) {
+  const [bh, bm] = busTime.split(":").map(Number);
+  const [nh, nm] = nowTime.split(":").map(Number);
+  return (bh * 60 + bm) - (nh * 60 + nm);
+}
+
+function getRemainText(diff) {
+  if (diff <= 0) return "まもなく";
+  return `あと ${diff} 分`;
+}
+
+function changeRoute(route) {
+  currentRoute = route;
+
+  ["all", "nishi25", "nishi27", "kame26"].forEach((key) => {
+    document.getElementById(`btn-${key}`).classList.toggle("active", key === route);
+  });
+
+  loadBuses();
+}
+
+async function loadBuses() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  try {
+    const res = await fetch(`/api/buses/${currentRoute}`);
+    const data = await res.json();
+
+    document.getElementById("stop").textContent = data.stop;
+    document.getElementById("direction").textContent = `${data.destination}方面`;
+    document.getElementById("now").textContent =
+      `現在 ${data.now} / ${getDayTypeLabel(data.day_type)}ダイヤ / ${data.route}`;
+
+    if (!data.buses || data.buses.length === 0) {
+      document.getElementById("nextTime").textContent = "終了";
+      document.getElementById("remaining").textContent = "--";
+      document.getElementById("count").textContent = "本日の残りの便はありません";
+
+      list.innerHTML = `
+        <div class="bus-card">
+          <div class="bus-header">
+            本日のバスは終了しました
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const first = data.buses[0];
+    const firstDiff = calcRemainingMinutes(first.time, data.now);
+
+    document.getElementById("nextTime").textContent = first.time;
+    document.getElementById("remaining").textContent = getRemainText(firstDiff);
+    document.getElementById("count").textContent =
+      `このあと ${data.buses.length} 本あります`;
+
+    data.buses.forEach((bus) => {
+      const diff = calcRemainingMinutes(bus.time, data.now);
+      const card = document.createElement("div");
+      card.className = "bus-card";
+
+      card.innerHTML = `
+        <div class="bus-header">
+          <div class="bus-time">${bus.time}</div>
+          <div class="bus-note">
+            <span class="route-badge">${bus.route}</span><br>
+            ${getRemainText(diff)}
+          </div>
+        </div>
+      `;
+
+      list.appendChild(card);
+    });
+
+  } catch (e) {
+    document.getElementById("nextTime").textContent = "エラー";
+    document.getElementById("remaining").textContent = "--";
+    document.getElementById("count").textContent = "時刻表を取得できませんでした";
+  }
+}
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/static/service-worker.js");
+  });
+}
+
+loadBuses();
+setInterval(loadBuses, 60000);
+</script>
+
+</body>
+</html>
