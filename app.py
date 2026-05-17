@@ -12,6 +12,8 @@ from gtfs_utils import (
     get_route_label,
     get_direction_label,
     is_target_direction,
+    get_bus_location_status,
+    find_nearest_scheduled_bus,
     get_debug_status,
 )
 
@@ -275,11 +277,15 @@ def get_remaining_buses(route_key):
         times = route.get(day_type, [])
 
         for t in times:
-            if time_to_minutes(t) + DISPLAY_GRACE_MINUTES >= now_minutes:
+            bus_minutes = time_to_minutes(t)
+
+            if bus_minutes + DISPLAY_GRACE_MINUTES >= now_minutes:
                 buses.append({
                     "time": t,
                     "route": route["label"],
                     "route_key": key,
+                    "status": "scheduled",
+                    "realtime": None,
                 })
 
     buses.sort(key=lambda x: time_to_minutes(x["time"]))
@@ -333,16 +339,35 @@ def fetch_toei_realtime():
                 lat = vehicle.position.latitude
                 lon = vehicle.position.longitude
 
+            route_key = None
+            route_label = ""
+
+            for key, target_route_id in ROUTE_IDS.items():
+                if route_id == target_route_id:
+                    route_key = key
+                    route_label = get_route_label(key)
+                    break
+
+            location = get_bus_location_status(
+                trip_id=trip_id,
+                current_stop_id=stop_id,
+                target_stop_name=STOP_NAME,
+            )
+
             item = {
                 "entity_id": entity.id,
                 "trip_id": trip_id,
                 "route_id": route_id,
-                "route_key": None,
-                "route_label": "",
+                "route_key": route_key,
+                "route_label": route_label,
                 "direction": get_direction_label(trip_id),
                 "vehicle_id": vehicle_id,
                 "stop_id": stop_id,
                 "stop_name": get_stop_name(stop_id),
+                "current_stop_name": location["current_stop_name"],
+                "remaining_stop_count": location["remaining_stop_count"],
+                "status_text": location["status_text"],
+                "progress_stops": location["progress_stops"],
                 "latitude": lat,
                 "longitude": lon,
                 "distance_km": None,
@@ -353,12 +378,6 @@ def fetch_toei_realtime():
                     distance_km(TARGET_LAT, TARGET_LON, lat, lon),
                     3,
                 )
-
-            for key, target_route_id in ROUTE_IDS.items():
-                if route_id == target_route_id:
-                    item["route_key"] = key
-                    item["route_label"] = get_route_label(key)
-                    break
 
             vehicles.append(item)
 
@@ -407,9 +426,14 @@ def get_realtime_buses(route_key):
         vehicles.append(v)
 
     vehicles.sort(
-        key=lambda x: x["distance_km"]
-        if x.get("distance_km") is not None
-        else 9999
+        key=lambda x: (
+            x["remaining_stop_count"]
+            if x.get("remaining_stop_count") is not None
+            else 9999,
+            x["distance_km"]
+            if x.get("distance_km") is not None
+            else 9999,
+        )
     )
 
     return {
@@ -417,6 +441,58 @@ def get_realtime_buses(route_key):
         "reason": "",
         "vehicles": vehicles,
     }
+
+
+def get_fused_buses(route_key):
+    scheduled = get_remaining_buses(route_key)
+    realtime = get_realtime_buses(route_key)
+
+    buses = scheduled["buses"]
+
+    if not realtime["ok"]:
+        scheduled["realtime_ok"] = False
+        scheduled["realtime_reason"] = realtime["reason"]
+        scheduled["realtime_vehicles"] = []
+        return scheduled
+
+    now = datetime.now(JST)
+    now_minutes = now.hour * 60 + now.minute
+
+    vehicles = realtime["vehicles"]
+
+    used_vehicle_ids = set()
+
+    for bus in buses:
+        matched = find_nearest_scheduled_bus(
+            buses=buses,
+            route_key=bus["route_key"],
+            now_minutes=now_minutes,
+        )
+
+        for vehicle in vehicles:
+            if vehicle.get("vehicle_id") in used_vehicle_ids:
+                continue
+
+            if vehicle.get("route_key") != bus["route_key"]:
+                continue
+
+            matched_for_vehicle = find_nearest_scheduled_bus(
+                buses=buses,
+                route_key=vehicle["route_key"],
+                now_minutes=now_minutes,
+            )
+
+            if matched_for_vehicle and matched_for_vehicle.get("time") == bus.get("time"):
+                bus["status"] = "realtime"
+                bus["realtime"] = vehicle
+                used_vehicle_ids.add(vehicle.get("vehicle_id"))
+                break
+
+    scheduled["realtime_ok"] = True
+    scheduled["realtime_reason"] = ""
+    scheduled["realtime_vehicles"] = vehicles
+
+    return scheduled
 
 
 @app.route("/")
@@ -429,7 +505,7 @@ def buses(route_key):
     if route_key != "all" and route_key not in BUS_TIMES:
         return jsonify({"error": "invalid route"}), 404
 
-    return jsonify(get_remaining_buses(route_key))
+    return jsonify(get_fused_buses(route_key))
 
 
 @app.route("/api/realtime/<route_key>")

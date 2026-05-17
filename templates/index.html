@@ -16,7 +16,7 @@
   <style>
     :root {
       --bg: #eaf7ff;
-      --card: rgba(255, 255, 255, 0.92);
+      --card: rgba(255, 255, 255, 0.94);
       --text: #243447;
       --sub: #6b8299;
       --main: #2f80ed;
@@ -24,6 +24,8 @@
       --accent: #00a7c8;
       --green: #22c55e;
       --green-soft: #dcfce7;
+      --orange: #f59e0b;
+      --orange-soft: #fff7ed;
       --border: rgba(47, 128, 237, 0.16);
       --shadow: 0 18px 40px rgba(38, 92, 140, 0.14);
     }
@@ -197,7 +199,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       color: #166534;
       font-size: 14px;
       font-weight: 900;
@@ -210,20 +212,25 @@
       color: #15803d;
       font-size: 12px;
       font-weight: 900;
+      white-space: nowrap;
     }
 
     .realtime-list {
       display: grid;
-      gap: 10px;
+      gap: 12px;
     }
 
     .realtime-card {
       background: #fff;
       border: 1px solid rgba(34, 197, 94, 0.18);
-      border-radius: 18px;
-      padding: 12px;
+      border-radius: 20px;
+      padding: 13px;
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.08);
+    }
+
+    .realtime-top {
       display: grid;
-      grid-template-columns: 62px 1fr;
+      grid-template-columns: 58px 1fr;
       gap: 10px;
       align-items: center;
     }
@@ -264,6 +271,94 @@
       text-overflow: ellipsis;
     }
 
+    .location-map {
+      margin-top: 12px;
+      padding: 12px 8px 4px;
+      border-radius: 16px;
+      background: #f8fffb;
+      border: 1px solid rgba(34, 197, 94, 0.13);
+      overflow: hidden;
+    }
+
+    .location-line {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: 100%;
+    }
+
+    .location-stop {
+      position: relative;
+      flex: 1;
+      min-width: 42px;
+      text-align: center;
+    }
+
+    .location-stop:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      width: 100%;
+      height: 3px;
+      background: #cfe8d8;
+      z-index: 0;
+    }
+
+    .dot {
+      position: relative;
+      z-index: 1;
+      width: 18px;
+      height: 18px;
+      margin: 0 auto;
+      border-radius: 999px;
+      background: #cbd5e1;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 1px #cbd5e1;
+    }
+
+    .location-stop.current .dot {
+      background: var(--green);
+      box-shadow: 0 0 0 1px var(--green), 0 0 0 5px rgba(34, 197, 94, 0.16);
+    }
+
+    .location-stop.current .dot::after {
+      content: "🚌";
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+    }
+
+    .location-stop.target .dot {
+      background: var(--main);
+      box-shadow: 0 0 0 1px var(--main), 0 0 0 5px rgba(47, 128, 237, 0.15);
+    }
+
+    .location-stop.between .dot {
+      background: #86efac;
+      box-shadow: 0 0 0 1px #86efac;
+    }
+
+    .stop-label {
+      margin-top: 7px;
+      font-size: 10px;
+      line-height: 1.2;
+      color: var(--sub);
+      font-weight: 800;
+      height: 26px;
+      overflow: hidden;
+    }
+
+    .location-stop.current .stop-label {
+      color: #15803d;
+    }
+
+    .location-stop.target .stop-label {
+      color: var(--main);
+    }
+
     .list {
       margin-top: 18px;
       display: grid;
@@ -281,6 +376,11 @@
     .bus-card:first-child {
       border: 2px solid rgba(47, 128, 237, 0.65);
       box-shadow: 0 14px 28px rgba(47, 128, 237, 0.16);
+    }
+
+    .bus-card.realtime-hit {
+      border: 2px solid rgba(34, 197, 94, 0.7);
+      box-shadow: 0 14px 28px rgba(34, 197, 94, 0.18);
     }
 
     .bus-header {
@@ -315,6 +415,21 @@
       color: var(--main);
       font-size: 12px;
       font-weight: 900;
+    }
+
+    .route-badge.live {
+      background: var(--green-soft);
+      color: #15803d;
+    }
+
+    .live-detail {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(34, 197, 94, 0.28);
+      font-size: 12px;
+      color: #15803d;
+      font-weight: 900;
+      white-space: normal;
     }
 
     .reload {
@@ -386,7 +501,7 @@
 
     <div id="list" class="list"></div>
 
-    <button class="reload" onclick="reloadAll()">
+    <button class="reload" onclick="loadBuses()">
       ⟳ 更新する
     </button>
 
@@ -422,12 +537,40 @@ function changeRoute(route) {
     document.getElementById(`btn-${key}`).classList.toggle("active", key === route);
   });
 
-  reloadAll();
+  loadBuses();
+}
+
+function renderProgressStops(stops) {
+  if (!stops || stops.length === 0) {
+    return "";
+  }
+
+  const items = stops.map((s) => {
+    return `
+      <div class="location-stop ${s.role || "normal"}">
+        <div class="dot"></div>
+        <div class="stop-label">${s.stop_name || ""}</div>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="location-map">
+      <div class="location-line">
+        ${items}
+      </div>
+    </div>
+  `;
 }
 
 async function loadBuses() {
   const list = document.getElementById("list");
+  const realtimeList = document.getElementById("realtimeList");
+  const realtimeStatus = document.getElementById("realtimeStatus");
+
   list.innerHTML = "";
+  realtimeStatus.textContent = "取得中";
+  realtimeList.innerHTML = `<div class="empty">接近情報を取得中...</div>`;
 
   try {
     const res = await fetch(`/api/buses/${currentRoute}`);
@@ -438,113 +581,136 @@ async function loadBuses() {
     document.getElementById("now").textContent =
       `現在 ${data.now} / ${getDayTypeLabel(data.day_type)}ダイヤ / ${data.route}`;
 
-    if (!data.buses || data.buses.length === 0) {
-      document.getElementById("nextTime").textContent = "終了";
-      document.getElementById("remaining").textContent = "--";
-      document.getElementById("count").textContent = "本日の残りの便はありません";
-
-      list.innerHTML = `
-        <div class="bus-card">
-          <div class="bus-header">
-            本日のバスは終了しました
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    const first = data.buses[0];
-    const firstDiff = calcRemainingMinutes(first.time, data.now);
-
-    document.getElementById("nextTime").textContent = first.time;
-    document.getElementById("remaining").textContent = getRemainText(firstDiff);
-    document.getElementById("count").textContent =
-      `このあと ${data.buses.length} 本あります`;
-
-    data.buses.forEach((bus) => {
-      const diff = calcRemainingMinutes(bus.time, data.now);
-      const card = document.createElement("div");
-      card.className = "bus-card";
-
-      card.innerHTML = `
-        <div class="bus-header">
-          <div class="bus-time">${bus.time}</div>
-          <div class="bus-note">
-            <span class="route-badge">${bus.route}</span><br>
-            ${getRemainText(diff)}
-          </div>
-        </div>
-      `;
-
-      list.appendChild(card);
-    });
+    renderRealtimeBox(data);
+    renderBusList(data);
 
   } catch (e) {
     document.getElementById("nextTime").textContent = "エラー";
     document.getElementById("remaining").textContent = "--";
     document.getElementById("count").textContent = "時刻表を取得できませんでした";
+    realtimeStatus.textContent = "エラー";
+    realtimeList.innerHTML = `<div class="empty">通信エラーです</div>`;
   }
 }
 
-async function loadRealtime() {
+function renderRealtimeBox(data) {
   const realtimeList = document.getElementById("realtimeList");
   const realtimeStatus = document.getElementById("realtimeStatus");
 
-  realtimeStatus.textContent = "取得中";
-  realtimeList.innerHTML = `<div class="empty">接近情報を取得中...</div>`;
+  if (!data.realtime_ok) {
+    realtimeStatus.textContent = "エラー";
+    realtimeList.innerHTML = `<div class="empty">${data.realtime_reason || "取得できませんでした"}</div>`;
+    return;
+  }
 
-  try {
-    const res = await fetch(`/api/realtime/${currentRoute}`);
-    const data = await res.json();
+  const vehicles = data.realtime_vehicles || [];
 
-    if (!data.ok) {
-      realtimeStatus.textContent = "エラー";
-      realtimeList.innerHTML = `<div class="empty">${data.reason || "取得できませんでした"}</div>`;
-      return;
-    }
+  if (vehicles.length === 0) {
+    realtimeStatus.textContent = "なし";
+    realtimeList.innerHTML = `<div class="empty">接近中の車両は見つかりませんでした</div>`;
+    return;
+  }
 
-    if (!data.vehicles || data.vehicles.length === 0) {
-      realtimeStatus.textContent = "なし";
-      realtimeList.innerHTML = `<div class="empty">接近中の車両は見つかりませんでした</div>`;
-      return;
-    }
+  realtimeStatus.textContent = `${vehicles.length}台`;
+  realtimeList.innerHTML = "";
 
-    realtimeStatus.textContent = `${data.vehicles.length}台`;
+  vehicles.slice(0, 4).forEach((v) => {
+    const card = document.createElement("div");
+    card.className = "realtime-card";
 
-    realtimeList.innerHTML = "";
-
-    data.vehicles.slice(0, 4).forEach((v) => {
-      const card = document.createElement("div");
-      card.className = "realtime-card";
-
-      card.innerHTML = `
+    card.innerHTML = `
+      <div class="realtime-top">
         <div class="realtime-route">
           ${v.route_label || "バス"}
         </div>
 
         <div class="realtime-main">
           <div class="realtime-place">
-            ${v.stop_name || "接近中"}
+            ${v.status_text || "接近中"} / ${v.current_stop_name || v.stop_name || "接近中"}
           </div>
 
           <div class="realtime-sub">
             ${v.direction || "亀戸駅前方面"} / 車両 ${v.vehicle_id || "--"}
           </div>
         </div>
-      `;
+      </div>
 
-      realtimeList.appendChild(card);
-    });
+      ${renderProgressStops(v.progress_stops)}
+    `;
 
-  } catch (e) {
-    realtimeStatus.textContent = "エラー";
-    realtimeList.innerHTML = `<div class="empty">通信エラーです</div>`;
-  }
+    realtimeList.appendChild(card);
+  });
 }
 
-function reloadAll() {
-  loadBuses();
-  loadRealtime();
+function renderBusList(data) {
+  const list = document.getElementById("list");
+
+  if (!data.buses || data.buses.length === 0) {
+    document.getElementById("nextTime").textContent = "終了";
+    document.getElementById("remaining").textContent = "--";
+    document.getElementById("count").textContent = "本日の残りの便はありません";
+
+    list.innerHTML = `
+      <div class="bus-card">
+        <div class="bus-header">
+          本日のバスは終了しました
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const first = data.buses[0];
+  const firstDiff = calcRemainingMinutes(first.time, data.now);
+
+  document.getElementById("nextTime").textContent = first.time;
+
+  if (first.realtime) {
+    document.getElementById("remaining").textContent =
+      `${first.realtime.status_text || "接近中"}`;
+  } else {
+    document.getElementById("remaining").textContent = getRemainText(firstDiff);
+  }
+
+  document.getElementById("count").textContent =
+    `このあと ${data.buses.length} 本あります`;
+
+  data.buses.forEach((bus) => {
+    const diff = calcRemainingMinutes(bus.time, data.now);
+    const card = document.createElement("div");
+
+    card.className = bus.realtime ? "bus-card realtime-hit" : "bus-card";
+
+    const badgeClass = bus.realtime ? "route-badge live" : "route-badge";
+    const badgeText = bus.realtime ? `${bus.route} 接近中` : bus.route;
+
+    const noteText = bus.realtime
+      ? `${bus.realtime.status_text || "接近中"}`
+      : getRemainText(diff);
+
+    const liveDetail = bus.realtime
+      ? `
+        <div class="live-detail">
+          ${bus.realtime.current_stop_name || bus.realtime.stop_name || "接近中"} /
+          車両 ${bus.realtime.vehicle_id || "--"}
+        </div>
+      `
+      : "";
+
+    card.innerHTML = `
+      <div class="bus-header">
+        <div class="bus-time">${bus.time}</div>
+
+        <div class="bus-note">
+          <span class="${badgeClass}">${badgeText}</span><br>
+          ${noteText}
+          ${liveDetail}
+        </div>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
 }
 
 if ("serviceWorker" in navigator) {
@@ -553,8 +719,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-reloadAll();
-setInterval(reloadAll, 60000);
+loadBuses();
+setInterval(loadBuses, 60000);
 </script>
 
 </body>
