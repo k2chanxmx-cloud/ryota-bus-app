@@ -1,711 +1,574 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>亀戸七丁目バス</title>
+<title>次のバス</title>
 
-  <link rel="manifest" href="/static/manifest.json" />
-  <meta name="theme-color" content="#eaf7ff" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="亀戸七丁目バス" />
-  <link rel="apple-touch-icon" href="/static/icon-512.png" />
+<style>
+body{
+    margin:0;
+    padding:0;
+    background:#eef6ff;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:#1f3552;
+}
 
-  <style>
-    :root {
-      --bg: #eaf7ff;
-      --card: rgba(255,255,255,0.94);
-      --text: #243447;
-      --sub: #6b8299;
-      --main: #2f80ed;
-      --main-soft: #d8ecff;
-      --accent: #00a7c8;
-      --green: #22c55e;
-      --green-soft: #dcfce7;
-      --border: rgba(47,128,237,0.16);
-      --shadow: 0 18px 40px rgba(38,92,140,0.14);
-    }
+.container{
+    max-width:430px;
+    margin:auto;
+    min-height:100vh;
+    background:#f5f9ff;
+}
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+.header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:18px 18px 8px;
+}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
-      background:
-        radial-gradient(circle at top left, #c9efff 0, transparent 32%),
-        radial-gradient(circle at bottom right, #dbeafe 0, transparent 34%),
-        linear-gradient(180deg, #f7fcff 0%, var(--bg) 100%);
-      color: var(--text);
-      overflow-x: hidden;
-    }
+.header-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#4da5ff,#74d4ff);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:28px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
 
-    .app {
-      max-width: 430px;
-      margin: 0 auto;
-      min-height: 100vh;
-      padding: calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 24px);
-    }
+.header-small{
+    font-size:13px;
+    color:#5e7896;
+    font-weight:600;
+}
 
-    .app-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
+.header-title{
+    font-size:42px;
+    font-weight:800;
+    line-height:1.1;
+}
 
-    .header-icon {
-      width: 58px;
-      height: 58px;
-      border-radius: 18px;
-      object-fit: cover;
-      background: #fff;
-      box-shadow: 0 10px 24px rgba(47,128,237,0.18);
-    }
+.route-tabs{
+    margin:8px 16px 14px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
 
-    .small {
-      color: var(--sub);
-      font-size: 13px;
-      font-weight: 800;
-    }
+.route-btn{
+    border:none;
+    border-radius:18px;
+    padding:16px;
+    font-size:24px;
+    font-weight:800;
+    background:#e4edf7;
+    color:#5f7896;
+}
 
-    h1 {
-      margin: 2px 0 0;
-      font-size: 31px;
-      line-height: 1.15;
-      letter-spacing: -0.04em;
-      color: var(--text);
-    }
+.route-btn.active{
+    background:linear-gradient(90deg,#2d7be9,#00b6dd);
+    color:white;
+}
 
-    .card {
-      padding: 18px;
-      border-radius: 30px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
+.card{
+    margin:0 16px 16px;
+    background:white;
+    border-radius:24px;
+    padding:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
 
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
+.direction-label{
+    font-size:15px;
+    color:#7087a3;
+    font-weight:700;
+}
 
-    .tab {
-      border: 0;
-      border-radius: 18px;
-      padding: 13px 8px;
-      font-size: 15px;
-      font-weight: 900;
-      color: var(--sub);
-      background: #eef7ff;
-      cursor: pointer;
-      box-shadow: inset 0 0 0 1px rgba(47,128,237,0.08);
-    }
+.direction-main{
+    font-size:54px;
+    font-weight:900;
+    margin-top:4px;
+}
 
-    .tab.active {
-      color: #fff;
-      background: linear-gradient(135deg, var(--main), var(--accent));
-      box-shadow: 0 10px 22px rgba(47,128,237,0.24);
-    }
+.direction-sub{
+    margin-top:8px;
+    color:#7d91aa;
+    font-weight:600;
+}
 
-    .info {
-      padding: 17px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #eaf6ff, #f8fdff);
-      border: 1px solid var(--border);
-    }
+.big-bus{
+    background:linear-gradient(180deg,#114f7a,#0f6f95);
+    color:white;
+    border-radius:26px;
+    padding:22px;
+}
 
-    .stop {
-      color: var(--sub);
-      font-size: 14px;
-      font-weight: 900;
-    }
+.big-bus-title{
+    font-size:14px;
+    opacity:0.9;
+    font-weight:700;
+}
 
-    .direction {
-      margin-top: 5px;
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--text);
-      letter-spacing: -0.03em;
-    }
+.big-bus-time{
+    font-size:74px;
+    font-weight:900;
+    line-height:1;
+    margin-top:8px;
+}
 
-    .now {
-      margin-top: 8px;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--sub);
-    }
+.big-bus-status{
+    margin-top:8px;
+    font-size:26px;
+    font-weight:800;
+}
 
-    .next-box {
-      margin-top: 16px;
-      padding: 20px;
-      border-radius: 26px;
-      background: linear-gradient(135deg, #0f3a66, #126a8a);
-      color: #fff;
-      box-shadow: 0 16px 32px rgba(18,106,138,0.22);
-    }
+.big-bus-sub{
+    margin-top:10px;
+    font-size:14px;
+    opacity:0.85;
+    font-weight:600;
+}
 
-    .next-label {
-      font-size: 14px;
-      font-weight: 900;
-      opacity: 0.82;
-    }
+.realtime-card{
+    background:#f3fff5;
+    border:2px solid #c6efcf;
+}
 
-    .next-time {
-      margin-top: 4px;
-      font-size: 64px;
-      line-height: 1;
-      font-weight: 900;
-      letter-spacing: -0.06em;
-    }
+.realtime-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+}
 
-    .remaining {
-      margin-top: 12px;
-      font-size: 24px;
-      font-weight: 900;
-      color: #bdf3ff;
-    }
+.realtime-title{
+    font-size:16px;
+    font-weight:800;
+    color:#1f7b45;
+}
 
-    .count {
-      margin-top: 8px;
-      font-size: 13px;
-      font-weight: 800;
-      opacity: 0.8;
-    }
+.realtime-badge{
+    background:#d9f7df;
+    color:#16893f;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:800;
+}
 
-    .realtime-box {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 24px;
-      background: #f0fdf4;
-      border: 1px solid rgba(34,197,94,0.22);
-      box-shadow: 0 10px 24px rgba(34,197,94,0.10);
-    }
+.bus-item{
+    background:white;
+    border-radius:22px;
+    padding:18px;
+    margin-bottom:14px;
+    border:1px solid #d8f0dd;
+}
 
-    .realtime-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-      color: #166534;
-      font-size: 14px;
-      font-weight: 900;
-    }
+.bus-top{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+}
 
-    .realtime-chip {
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: var(--green-soft);
-      color: #15803d;
-      font-size: 12px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
+.bus-route{
+    background:#27c957;
+    color:white;
+    min-width:72px;
+    text-align:center;
+    padding:10px 0;
+    border-radius:18px;
+    font-size:28px;
+    font-weight:900;
+}
 
-    .realtime-list {
-      display: grid;
-      gap: 12px;
-    }
+.bus-main{
+    flex:1;
+}
 
-    .realtime-card {
-      background: #fff;
-      border: 1px solid rgba(34,197,94,0.18);
-      border-radius: 20px;
-      padding: 13px;
-      box-shadow: 0 8px 20px rgba(34,197,94,0.08);
-    }
+.bus-status{
+    font-size:15px;
+    color:#6e839f;
+    font-weight:700;
+}
 
-    .realtime-top {
-      display: grid;
-      grid-template-columns: 58px 1fr;
-      gap: 10px;
-      align-items: center;
-    }
+.bus-stop{
+    font-size:34px;
+    font-weight:900;
+    margin-top:2px;
+    line-height:1.1;
+}
 
-    .realtime-route {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 52px;
-      padding: 8px 6px;
-      border-radius: 14px;
-      background: var(--green);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 900;
-    }
+.bus-meta{
+    margin-top:6px;
+    color:#70839b;
+    font-size:14px;
+    font-weight:700;
+}
 
-    .realtime-main {
-      min-width: 0;
-    }
+.progress{
+    margin-top:16px;
+    background:#f5faf6;
+    border:1px solid #d2e7d8;
+    border-radius:18px;
+    padding:16px 12px;
+}
 
-    .realtime-place {
-      font-size: 15px;
-      font-weight: 900;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+.progress-line{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+}
 
-    .realtime-sub {
-      margin-top: 4px;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--sub);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+.progress-line::before{
+    content:"";
+    position:absolute;
+    left:20px;
+    right:20px;
+    top:14px;
+    height:4px;
+    background:#c8d8cf;
+    z-index:0;
+}
 
-    .location-map {
-      margin-top: 12px;
-      padding: 12px 8px 4px;
-      border-radius: 16px;
-      background: #f8fffb;
-      border: 1px solid rgba(34,197,94,0.13);
-      overflow: hidden;
-    }
+.progress-stop{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:64px;
+}
 
-    .location-line {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      min-width: 100%;
-    }
+.progress-dot{
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:#cfd8e3;
+    border:4px solid white;
+    box-shadow:0 0 0 2px #b7c5d2;
+}
 
-    .location-stop {
-      position: relative;
-      flex: 1;
-      min-width: 42px;
-      text-align: center;
-    }
+.progress-stop.current .progress-dot{
+    background:#27c957;
+    box-shadow:0 0 0 2px #27c957;
+}
 
-    .location-stop:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      top: 9px;
-      left: 50%;
-      width: 100%;
-      height: 3px;
-      background: #cfe8d8;
-      z-index: 0;
-    }
+.progress-stop.target .progress-dot{
+    background:#27c957;
+    box-shadow:0 0 0 2px #27c957;
+}
 
-    .dot {
-      position: relative;
-      z-index: 1;
-      width: 18px;
-      height: 18px;
-      margin: 0 auto;
-      border-radius: 999px;
-      background: #cbd5e1;
-      border: 3px solid #fff;
-      box-shadow: 0 0 0 1px #cbd5e1;
-    }
+.progress-name{
+    margin-top:10px;
+    font-size:11px;
+    text-align:center;
+    color:#6f819a;
+    line-height:1.2;
+    font-weight:700;
+}
 
-    .location-stop.current .dot {
-      background: var(--green);
-      box-shadow: 0 0 0 1px var(--green), 0 0 0 5px rgba(34,197,94,0.16);
-    }
+.progress-stop.current .progress-name,
+.progress-stop.target .progress-name{
+    color:#1d8b41;
+    font-weight:900;
+}
 
-    .location-stop.current .dot::after {
-      content: "🚌";
-      position: absolute;
-      top: -22px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 18px;
-    }
+.bus-emoji{
+    position:absolute;
+    top:-26px;
+    font-size:22px;
+}
 
-    .location-stop.target .dot {
-      background: var(--main);
-      box-shadow: 0 0 0 1px var(--main), 0 0 0 5px rgba(47,128,237,0.15);
-    }
+.empty{
+    text-align:center;
+    padding:34px 0;
+    color:#7f93ab;
+    font-weight:700;
+}
 
-    .location-stop.between .dot {
-      background: #86efac;
-      box-shadow: 0 0 0 1px #86efac;
-    }
+@media(max-width:430px){
 
-    .stop-label {
-      margin-top: 7px;
-      font-size: 10px;
-      line-height: 1.2;
-      color: var(--sub);
-      font-weight: 800;
-      height: 26px;
-      overflow: hidden;
-    }
+.header-title{
+    font-size:34px;
+}
 
-    .location-stop.current .stop-label {
-      color: #15803d;
-    }
+.direction-main{
+    font-size:42px;
+}
 
-    .location-stop.target .stop-label {
-      color: var(--main);
-    }
+.big-bus-time{
+    font-size:58px;
+}
 
-    .list {
-      margin-top: 18px;
-      display: grid;
-      gap: 12px;
-    }
+.bus-stop{
+    font-size:28px;
+}
 
-    .bus-card {
-      border-radius: 22px;
-      background: #fff;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      box-shadow: 0 10px 24px rgba(38,92,140,0.08);
-    }
+.route-btn{
+    font-size:20px;
+}
 
-    .bus-card:first-child {
-      border: 2px solid rgba(47,128,237,0.65);
-      box-shadow: 0 14px 28px rgba(47,128,237,0.16);
-    }
-
-    .bus-card.realtime-hit {
-      border: 2px solid rgba(34,197,94,0.7);
-      box-shadow: 0 14px 28px rgba(34,197,94,0.18);
-    }
-
-    .bus-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 17px;
-    }
-
-    .bus-time {
-      font-size: 34px;
-      font-weight: 900;
-      color: var(--text);
-      letter-spacing: -0.04em;
-    }
-
-    .bus-note {
-      text-align: right;
-      color: var(--sub);
-      font-size: 14px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    .route-badge {
-      display: inline-block;
-      margin-bottom: 5px;
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: var(--main-soft);
-      color: var(--main);
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .route-badge.live {
-      background: var(--green-soft);
-      color: #15803d;
-    }
-
-    .live-detail {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed rgba(34,197,94,0.28);
-      font-size: 12px;
-      color: #15803d;
-      font-weight: 900;
-      white-space: normal;
-    }
-
-    .reload {
-      width: 100%;
-      margin-top: 16px;
-      border: 0;
-      border-radius: 20px;
-      padding: 15px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--main), var(--accent));
-      font-size: 16px;
-      font-weight: 900;
-      box-shadow: 0 12px 24px rgba(47,128,237,0.22);
-      cursor: pointer;
-    }
-
-    .empty {
-      padding: 14px;
-      text-align: center;
-      color: var(--sub);
-      font-size: 13px;
-      font-weight: 800;
-    }
-  </style>
+}
+</style>
 </head>
 
 <body>
-<main class="app">
 
-  <div class="app-header">
-    <img class="header-icon" src="/static/icon-512.png" alt="バス">
+<div class="container">
+
+<div class="header">
+    <div class="header-icon">🚌</div>
+
     <div>
-      <div class="small">現在地 → 亀戸七丁目</div>
-      <h1>次のバス</h1>
+        <div class="header-small">
+            現在地 → 亀戸七丁目
+        </div>
+
+        <div class="header-title">
+            次のバス
+        </div>
     </div>
-  </div>
+</div>
 
-  <section class="card">
+<div class="route-tabs">
+    <button class="route-btn active" onclick="selectRoute('all', this)">すべて</button>
+    <button class="route-btn" onclick="selectRoute('錦25', this)">錦25</button>
+    <button class="route-btn" onclick="selectRoute('錦27', this)">錦27</button>
+    <button class="route-btn" onclick="selectRoute('亀26', this)">亀26</button>
+</div>
 
-    <div class="tabs">
-      <button id="btn-all" class="tab active" onclick="changeRoute('all')">すべて</button>
-      <button id="btn-nishi25" class="tab" onclick="changeRoute('nishi25')">錦25</button>
-      <button id="btn-nishi27" class="tab" onclick="changeRoute('nishi27')">錦27</button>
-      <button id="btn-kame26" class="tab" onclick="changeRoute('kame26')">亀26</button>
-    </div>
-
-    <div class="info">
-      <div id="stop" class="stop">亀戸七丁目</div>
-      <div id="direction" class="direction">亀戸駅前方面</div>
-      <div id="now" class="now">読み込み中...</div>
-    </div>
-
-    <div class="next-box">
-      <div class="next-label">いちばん近いバス</div>
-      <div id="nextTime" class="next-time">--:--</div>
-      <div id="remaining" class="remaining">--</div>
-      <div id="count" class="count">--</div>
+<div class="card">
+    <div class="direction-label">
+        亀戸七丁目
     </div>
 
-    <div class="realtime-box">
-      <div class="realtime-title">
-        <span>リアルタイム接近情報</span>
-        <span id="realtimeStatus" class="realtime-chip">取得中</span>
-      </div>
-      <div id="realtimeList" class="realtime-list">
-        <div class="empty">接近情報を取得中...</div>
-      </div>
+    <div class="direction-main">
+        亀戸駅前方面
     </div>
 
-    <div id="list" class="list"></div>
+    <div class="direction-sub">
+        <span id="nowTime"></span> / 土曜ダイヤ / すべて
+    </div>
+</div>
 
-    <button class="reload" onclick="loadBuses()">⟳ 更新する</button>
+<div class="card big-bus">
+    <div class="big-bus-title">
+        いちばん近いバス
+    </div>
 
-  </section>
+    <div class="big-bus-time" id="nearestTime">
+        --
+    </div>
 
-</main>
+    <div class="big-bus-status" id="nearestStatus">
+        読み込み中
+    </div>
+
+    <div class="big-bus-sub" id="nearestSub">
+        ...
+    </div>
+</div>
+
+<div class="card realtime-card">
+
+    <div class="realtime-header">
+        <div class="realtime-title">
+            リアルタイム接近情報
+        </div>
+
+        <div class="realtime-badge" id="busCount">
+            0台
+        </div>
+    </div>
+
+    <div id="realtimeContainer">
+        <div class="empty">
+            読み込み中...
+        </div>
+    </div>
+
+</div>
+
+</div>
 
 <script>
-let currentRoute = "all";
 
-function getDayTypeLabel(dayType) {
-  if (dayType === "weekday") return "平日";
-  if (dayType === "saturday") return "土曜";
-  if (dayType === "holiday") return "日曜/祝日";
-  return "";
+let selectedRoute = "all";
+
+function selectRoute(route, btn){
+
+    selectedRoute = route;
+
+    document.querySelectorAll(".route-btn").forEach(
+        b => b.classList.remove("active")
+    );
+
+    btn.classList.add("active");
+
+    loadRealtime();
 }
 
-function calcRemainingMinutes(busTime, nowTime) {
-  const [bh, bm] = busTime.split(":").map(Number);
-  const [nh, nm] = nowTime.split(":").map(Number);
-  return (bh * 60 + bm) - (nh * 60 + nm);
+function updateTime(){
+
+    const now = new Date();
+
+    const h = String(now.getHours()).padStart(2,"0");
+    const m = String(now.getMinutes()).padStart(2,"0");
+
+    document.getElementById("nowTime").innerText =
+        `現在 ${h}:${m}`;
 }
 
-function getRemainText(diff) {
-  if (diff <= 0) return "発車時刻超過";
-  return `あと ${diff} 分`;
-}
+function renderProgress(stops){
 
-function changeRoute(route) {
-  currentRoute = route;
+    if(!stops || !stops.length){
+        return "";
+    }
 
-  ["all", "nishi25", "nishi27", "kame26"].forEach((key) => {
-    document.getElementById(`btn-${key}`).classList.toggle("active", key === route);
-  });
+    return `
+        <div class="progress">
 
-  loadBuses();
-}
+            <div class="progress-line">
 
-function renderProgressStops(stops) {
-  if (!stops || stops.length === 0) return "";
+                ${stops.map(stop => `
 
-  const items = stops.map((s) => `
-    <div class="location-stop ${s.role || "normal"}">
-      <div class="dot"></div>
-      <div class="stop-label">${s.stop_name || ""}</div>
-    </div>
-  `).join("");
+                    <div class="progress-stop ${stop.role}">
 
-  return `
-    <div class="location-map">
-      <div class="location-line">${items}</div>
-    </div>
-  `;
-}
+                        ${stop.role === "current"
+                            ? `<div class="bus-emoji">🚌</div>`
+                            : ""
+                        }
 
-async function loadBuses() {
-  const list = document.getElementById("list");
-  const realtimeList = document.getElementById("realtimeList");
-  const realtimeStatus = document.getElementById("realtimeStatus");
+                        <div class="progress-dot"></div>
 
-  list.innerHTML = "";
-  realtimeStatus.textContent = "取得中";
-  realtimeList.innerHTML = `<div class="empty">接近情報を取得中...</div>`;
+                        <div class="progress-name">
+                            ${stop.stop_name}
+                        </div>
 
-  try {
-    const res = await fetch(`/api/buses/${currentRoute}`);
-    const data = await res.json();
+                    </div>
 
-    document.getElementById("stop").textContent = data.stop;
-    document.getElementById("direction").textContent = `${data.destination}方面`;
-    document.getElementById("now").textContent =
-      `現在 ${data.now} / ${getDayTypeLabel(data.day_type)}ダイヤ / ${data.route}`;
+                `).join("")}
 
-    renderRealtimeBox(data);
-    renderBusList(data);
+            </div>
 
-  } catch (e) {
-    document.getElementById("nextTime").textContent = "エラー";
-    document.getElementById("remaining").textContent = "--";
-    document.getElementById("count").textContent = "時刻表を取得できませんでした";
-    realtimeStatus.textContent = "エラー";
-    realtimeList.innerHTML = `<div class="empty">通信エラーです</div>`;
-  }
-}
-
-function renderRealtimeBox(data) {
-  const realtimeList = document.getElementById("realtimeList");
-  const realtimeStatus = document.getElementById("realtimeStatus");
-
-  const vehicles = data.realtime_vehicles || data.vehicles || [];
-
-  if (data.realtime_ok === false) {
-    realtimeStatus.textContent = "エラー";
-    realtimeList.innerHTML = `<div class="empty">${data.realtime_reason || "取得できませんでした"}</div>`;
-    return;
-  }
-
-  if (vehicles.length === 0) {
-    realtimeStatus.textContent = "なし";
-    realtimeList.innerHTML = `<div class="empty">接近中の車両は見つかりませんでした</div>`;
-    return;
-  }
-
-  realtimeStatus.textContent = `${vehicles.length}台`;
-  realtimeList.innerHTML = "";
-
-  vehicles.slice(0, 5).forEach((v) => {
-    const card = document.createElement("div");
-    card.className = "realtime-card";
-
-    card.innerHTML = `
-      <div class="realtime-top">
-        <div class="realtime-route">${v.route_label || "バス"}</div>
-
-        <div class="realtime-main">
-          <div class="realtime-place">
-            ${v.status_text || "接近中"} / ${v.current_stop_name || v.stop_name || "接近中"}
-          </div>
-
-          <div class="realtime-sub">
-            ${v.direction || "亀戸駅前方面"} / 車両 ${v.vehicle_id || "--"}
-          </div>
         </div>
-      </div>
-
-      ${renderProgressStops(v.progress_stops)}
     `;
-
-    realtimeList.appendChild(card);
-  });
 }
 
-function renderBusList(data) {
-  const list = document.getElementById("list");
+async function loadRealtime(){
 
-  if (!data.buses || data.buses.length === 0) {
-    document.getElementById("nextTime").textContent = "終了";
-    document.getElementById("remaining").textContent = "--";
-    document.getElementById("count").textContent = "本日の残りの便はありません";
+    try{
 
-    list.innerHTML = `
-      <div class="bus-card">
-        <div class="bus-header">本日のバスは終了しました</div>
-      </div>
-    `;
-    return;
-  }
+        const res = await fetch("/api/realtime");
 
-  const first = data.buses[0];
-  const firstDiff = calcRemainingMinutes(first.time, data.now);
+        const data = await res.json();
 
-  document.getElementById("nextTime").textContent = first.time;
+        const buses = data.buses || [];
 
-  if (first.realtime) {
-    document.getElementById("remaining").textContent =
-      first.realtime.status_text || "接近中";
-  } else {
-    document.getElementById("remaining").textContent = getRemainText(firstDiff);
-  }
+        const filtered = buses.filter(
+            b =>
+                selectedRoute === "all" ||
+                b.route_label === selectedRoute
+        );
 
-  document.getElementById("count").textContent =
-    `このあと ${data.buses.length} 本あります`;
+        document.getElementById("busCount").innerText =
+            `${filtered.length}台`;
 
-  data.buses.forEach((bus) => {
-    const diff = calcRemainingMinutes(bus.time, data.now);
-    const card = document.createElement("div");
+        const container = document.getElementById(
+            "realtimeContainer"
+        );
 
-    card.className = bus.realtime ? "bus-card realtime-hit" : "bus-card";
+        if(!filtered.length){
 
-    const badgeClass = bus.realtime ? "route-badge live" : "route-badge";
-    const badgeText = bus.realtime ? `${bus.route} 接近中` : bus.route;
+            container.innerHTML = `
+                <div class="empty">
+                    接近中の車両は見つかりませんでした
+                </div>
+            `;
 
-    const noteText = bus.realtime
-      ? (bus.realtime.status_text || "接近中")
-      : getRemainText(diff);
+            return;
+        }
 
-    const liveDetail = bus.realtime
-      ? `
-        <div class="live-detail">
-          ${bus.realtime.current_stop_name || bus.realtime.stop_name || "接近中"} /
-          車両 ${bus.realtime.vehicle_id || "--"}
-        </div>
-      `
-      : "";
+        container.innerHTML = filtered.map(bus => `
 
-    card.innerHTML = `
-      <div class="bus-header">
-        <div class="bus-time">${bus.time}</div>
+            <div class="bus-item">
 
-        <div class="bus-note">
-          <span class="${badgeClass}">${badgeText}</span><br>
-          ${noteText}
-          ${liveDetail}
-        </div>
-      </div>
-    `;
+                <div class="bus-top">
 
-    list.appendChild(card);
-  });
+                    <div class="bus-route">
+                        ${bus.route_label}
+                    </div>
+
+                    <div class="bus-main">
+
+                        <div class="bus-status">
+                            ${bus.status_text}
+                        </div>
+
+                        <div class="bus-stop">
+                            ${bus.current_stop_name}
+                        </div>
+
+                        <div class="bus-meta">
+                            ${bus.direction}
+                            / 車両 ${bus.vehicle_id}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                ${renderProgress(bus.progress_stops)}
+
+            </div>
+
+        `).join("");
+
+    }catch(e){
+
+        console.error(e);
+
+        document.getElementById(
+            "realtimeContainer"
+        ).innerHTML = `
+            <div class="empty">
+                APIエラー
+            </div>
+        `;
+    }
 }
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/static/service-worker.js");
-  });
+function updateNearest(){
+
+    const now = new Date();
+
+    const h = String(now.getHours()).padStart(2,"0");
+    const m = String(now.getMinutes()).padStart(2,"0");
+
+    document.getElementById("nearestTime").innerText =
+        `${h}:${m}`;
+
+    document.getElementById("nearestStatus").innerText =
+        "運行中";
+
+    document.getElementById("nearestSub").innerText =
+        "リアルタイム更新中";
 }
 
-loadBuses();
-setInterval(loadBuses, 60000);
+updateTime();
+updateNearest();
+loadRealtime();
+
+setInterval(updateTime, 1000);
+setInterval(loadRealtime, 15000);
+
 </script>
 
 </body>
