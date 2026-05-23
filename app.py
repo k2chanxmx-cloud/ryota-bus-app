@@ -437,12 +437,8 @@ def get_realtime_buses(route_key):
 
     vehicles.sort(
         key=lambda x: (
-            x["remaining_stop_count"]
-            if x.get("remaining_stop_count") is not None
-            else 9999,
-            x["distance_km"]
-            if x.get("distance_km") is not None
-            else 9999,
+            x.get("remaining_stop_count", 999),
+            x.get("distance_km", 999),
         )
     )
 

@@ -363,14 +363,14 @@ def get_bus_location_status(
         status_text = "通過済み"
 
     return {
-        "current_stop_name": current_stop_name,
-        "remaining_stop_count": remaining,
-        "status_text": status_text,
-        "progress_stops": build_progress_stops(
-            stops,
-            current_index,
-            target_index,
-        ),
+    "current_stop_name": current_stop_name,
+    "remaining_stop_count": (
+        remaining_count
+        if remaining_count is not None
+        else 999
+    ),
+    "status_text": status_text,
+    "progress_stops": progress_stops,
     }
 
 
