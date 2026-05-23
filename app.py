@@ -383,12 +383,12 @@ def get_realtime_buses(route_key):
 #        if not is_target_direction(trip_id):
 #            continue
 #
-#        if not is_before_or_at_target_stop(
-#            trip_id=trip_id,
-#            current_stop_id=current_stop_id,
-#            target_stop_name=STOP_NAME,
-#        ):
-#            continue
+        if not is_before_or_at_target_stop(
+            trip_id=trip_id,
+            current_stop_id=current_stop_id,
+            target_stop_name=STOP_NAME,
+        ):
+            continue
 
         if v.get("passed_target"):
             continue
