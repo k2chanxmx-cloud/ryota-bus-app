@@ -1,20 +1,22 @@
 from flask import Flask, render_template, jsonify
 from datetime import datetime
-import requests
+import os
 import math
+import requests
+from google.transit import gtfs_realtime_pb2
 
 from gtfs_utils import (
     ROUTE_IDS,
-    get_route_key_by_route_id,
     get_route_label,
     get_direction_label,
-    is_target_direction,
-    is_before_or_at_target_stop,
     get_bus_location_status,
     get_debug_status,
 )
 
 app = Flask(__name__)
+
+ODPT_API_KEY = os.environ.get("ODPT_API_KEY")
+ODPT_REALTIME_URL = "https://api.odpt.org/api/v4/gtfs/realtime/ToeiBus"
 
 TARGET_LOCATION = {
     "name": "亀戸七丁目",
@@ -22,22 +24,20 @@ TARGET_LOCATION = {
     "longitude": 139.8400,
 }
 
-GTFS_RT_URL = "https://tokyo-bus-gfsrt.odpt.org/api/v1/gtfsrt"
-
 SEARCH_RADIUS_KM = 3.5
 
 
-def haversine(lat1, lon1, lat2, lon2):
-    r = 6371
+def distance_km(lat1, lon1, lat2, lon2):
+    r = 6371.0
 
-    d_lat = math.radians(lat2 - lat1)
-    d_lon = math.radians(lon2 - lon1)
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
 
     a = (
-        math.sin(d_lat / 2) ** 2
+        math.sin(dlat / 2) ** 2
         + math.cos(math.radians(lat1))
         * math.cos(math.radians(lat2))
-        * math.sin(d_lon / 2) ** 2
+        * math.sin(dlon / 2) ** 2
     )
 
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
@@ -45,101 +45,154 @@ def haversine(lat1, lon1, lat2, lon2):
     return r * c
 
 
-def fetch_gtfs_rt():
+def get_route_key(route_id):
+    for key, value in ROUTE_IDS.items():
+        if value == route_id:
+            return key
+    return None
+
+
+def fetch_toei_realtime():
+    if not ODPT_API_KEY:
+        return {
+            "ok": False,
+            "reason": "ODPT_API_KEY が未設定です",
+            "vehicles": [],
+            "all_count": 0,
+        }
+
     try:
-        res = requests.get(GTFS_RT_URL, timeout=15)
-
-        if res.status_code != 200:
-            print("GTFS ERROR STATUS =", res.status_code)
-            return []
-
-        data = res.json()
-
-        return data.get("entity", [])
-
-    except Exception as e:
-        print("GTFS FETCH ERROR =", str(e))
-        return []
-
-
-def parse_vehicle(entity):
-    try:
-        vehicle = entity.get("vehicle", {})
-
-        trip = vehicle.get("trip", {})
-        position = vehicle.get("position", {})
-        vehicle_info = vehicle.get("vehicle", {})
-
-        trip_id = trip.get("tripId", "")
-        route_id = trip.get("routeId", "")
-        stop_id = vehicle.get("stopId", "")
-
-        lat = position.get("latitude")
-        lon = position.get("longitude")
-
-        if lat is None or lon is None:
-            return None
-
-        distance = haversine(
-            TARGET_LOCATION["latitude"],
-            TARGET_LOCATION["longitude"],
-            lat,
-            lon,
+        res = requests.get(
+            ODPT_REALTIME_URL,
+            params={"acl:consumerKey": ODPT_API_KEY},
+            timeout=15,
         )
 
-        if distance > SEARCH_RADIUS_KM:
-            return None
+        res.raise_for_status()
 
-        route_key = get_route_key_by_route_id(route_id)
+        feed = gtfs_realtime_pb2.FeedMessage()
+        feed.ParseFromString(res.content)
 
-        if not route_key:
-            return None
+        vehicles = []
 
-        if not is_target_direction(trip_id):
-            return None
+        for entity in feed.entity:
+            if not entity.HasField("vehicle"):
+                continue
 
-        if not is_before_or_at_target_stop(trip_id, stop_id):
-            return None
+            vehicle = entity.vehicle
 
-        status = get_bus_location_status(
-            trip_id,
-            stop_id,
-        )
+            trip_id = vehicle.trip.trip_id if vehicle.trip.trip_id else ""
+            route_id = vehicle.trip.route_id if vehicle.trip.route_id else ""
+            stop_id = vehicle.stop_id if vehicle.stop_id else ""
+            vehicle_id = vehicle.vehicle.id if vehicle.vehicle.id else entity.id
+
+            lat = None
+            lon = None
+
+            if vehicle.HasField("position"):
+                lat = vehicle.position.latitude
+                lon = vehicle.position.longitude
+
+            route_key = get_route_key(route_id)
+
+            location = get_bus_location_status(
+                trip_id=trip_id,
+                current_stop_id=stop_id,
+                target_stop_name=TARGET_LOCATION["name"],
+            )
+
+            item = {
+                "entity_id": entity.id,
+                "vehicle_id": vehicle_id,
+                "trip_id": trip_id,
+                "route_id": route_id,
+                "route_key": route_key,
+                "route_label": get_route_label(route_key) if route_key else "",
+                "stop_id": stop_id,
+                "current_stop_name": location.get("current_stop_name", "接近中"),
+                "direction": get_direction_label(trip_id),
+                "status_text": location.get("status_text", "接近中"),
+                "remaining_stop_count": location.get("remaining_stop_count"),
+                "progress_stops": location.get("progress_stops", []),
+                "passed_target": location.get("passed_target", False),
+                "latitude": lat,
+                "longitude": lon,
+                "distance_km": None,
+            }
+
+            if lat is not None and lon is not None:
+                item["distance_km"] = round(
+                    distance_km(
+                        TARGET_LOCATION["latitude"],
+                        TARGET_LOCATION["longitude"],
+                        lat,
+                        lon,
+                    ),
+                    3,
+                )
+
+            vehicles.append(item)
 
         return {
-            "vehicle_id": vehicle_info.get("id", "不明"),
-            "trip_id": trip_id,
-            "route_id": route_id,
-            "route_key": route_key,
-            "route_label": get_route_label(route_key),
-            "latitude": lat,
-            "longitude": lon,
-            "distance_km": round(distance, 3),
-            "direction": get_direction_label(trip_id),
-            "current_stop_name": status.get(
-                "current_stop_name",
-                "接近中",
-            ),
-            "remaining_stop_count": status.get(
-                "remaining_stop_count"
-            ),
-            "status_text": status.get(
-                "status_text",
-                "接近中",
-            ),
-            "progress_stops": status.get(
-                "progress_stops",
-                [],
-            ),
-            "passed_target": status.get(
-                "passed_target",
-                False,
-            ),
+            "ok": True,
+            "reason": "",
+            "vehicles": vehicles,
+            "all_count": len(vehicles),
         }
 
     except Exception as e:
-        print("PARSE VEHICLE ERROR =", str(e))
-        return None
+        print("REALTIME FETCH ERROR =", str(e))
+
+        return {
+            "ok": False,
+            "reason": str(e),
+            "vehicles": [],
+            "all_count": 0,
+        }
+
+
+def get_realtime_buses():
+    realtime = fetch_toei_realtime()
+
+    if not realtime["ok"]:
+        return {
+            "ok": False,
+            "reason": realtime["reason"],
+            "buses": [],
+            "all_count": realtime["all_count"],
+        }
+
+    buses = []
+
+    for v in realtime["vehicles"]:
+        if not v.get("route_key"):
+            continue
+
+        if v.get("distance_km") is None:
+            continue
+
+        if v["distance_km"] > SEARCH_RADIUS_KM:
+            continue
+
+        buses.append(v)
+
+    buses.sort(
+        key=lambda x: (
+            x.get("remaining_stop_count")
+            if x.get("remaining_stop_count") is not None
+            else 999,
+            x.get("distance_km")
+            if x.get("distance_km") is not None
+            else 999,
+        )
+    )
+
+    return {
+        "ok": True,
+        "reason": "",
+        "buses": buses,
+        "all_count": realtime["all_count"],
+    }
 
 
 @app.route("/")
@@ -149,95 +202,42 @@ def index():
 
 @app.route("/api/realtime")
 def realtime_api():
-    try:
-        entities = fetch_gtfs_rt()
+    result = get_realtime_buses()
 
-        buses = []
-
-        for entity in entities:
-            parsed = parse_vehicle(entity)
-
-            if parsed:
-                buses.append(parsed)
-
-        buses.sort(
-            key=lambda x: x.get("distance_km", 999)
-        )
-
-        print("REALTIME BUSES =", buses[:3])
-
-        return jsonify({
-            "ok": True,
-            "count": len(buses),
-            "buses": buses,
-        })
-
-    except Exception as e:
-        print("REALTIME API ERROR =", str(e))
-
-        return jsonify({
-            "ok": False,
-            "error": str(e),
-            "buses": [],
-        })
+    return jsonify({
+        "ok": result["ok"],
+        "reason": result["reason"],
+        "count": len(result["buses"]),
+        "buses": result["buses"],
+    })
 
 
 @app.route("/api/realtime-debug")
 def realtime_debug():
-    try:
-        entities = fetch_gtfs_rt()
+    realtime = fetch_toei_realtime()
+    result = get_realtime_buses()
 
-        nearby = []
-
-        for entity in entities:
-            parsed = parse_vehicle(entity)
-
-            if parsed:
-                nearby.append(parsed)
-
-        route_summary = {}
-
-        for bus in nearby:
-            rid = bus["route_id"]
-
-            if rid not in route_summary:
-                route_summary[rid] = {
-                    "count": 0,
-                    "vehicles": [],
-                }
-
-            route_summary[rid]["count"] += 1
-            route_summary[rid]["vehicles"].append(bus)
-
-        return jsonify({
-            "ok": True,
-            "all_count": len(entities),
-            "nearby_count": len(nearby),
-            "nearby_sample": nearby[:40],
-            "route_summary": route_summary,
-            "target": {
-                "name": TARGET_LOCATION["name"],
-                "latitude": TARGET_LOCATION["latitude"],
-                "longitude": TARGET_LOCATION["longitude"],
-                "search_radius_km": SEARCH_RADIUS_KM,
-            },
-            "gtfs": get_debug_status(),
-        })
-
-    except Exception as e:
-        return jsonify({
-            "ok": False,
-            "error": str(e),
-        })
+    return jsonify({
+        "ok": realtime["ok"],
+        "reason": realtime["reason"],
+        "all_count": realtime["all_count"],
+        "nearby_count": len(result["buses"]),
+        "nearby_sample": result["buses"][:40],
+        "gtfs": get_debug_status(),
+        "target": {
+            "name": TARGET_LOCATION["name"],
+            "latitude": TARGET_LOCATION["latitude"],
+            "longitude": TARGET_LOCATION["longitude"],
+            "search_radius_km": SEARCH_RADIUS_KM,
+        },
+    })
 
 
 @app.route("/health")
 def health():
     return jsonify({
         "ok": True,
-        "time": datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ),
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     })
 
 
