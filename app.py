@@ -12,6 +12,7 @@ from gtfs_utils import (
     get_route_label,
     get_direction_label,
     is_target_direction,
+    is_valid_bus_for_target_stop,
     get_bus_location_status,
     find_nearest_scheduled_bus,
     get_debug_status,
@@ -414,7 +415,16 @@ def get_realtime_buses(route_key):
         if route_key != "all" and v.get("route_key") != route_key:
             continue
 
-        if not is_target_direction(v.get("trip_id", "")):
+        trip_id = v.get("trip_id", "")
+        current_stop_id = v.get("stop_id", "")
+
+        if not is_target_direction(trip_id):
+            continue
+
+        if not is_valid_bus_for_target_stop(
+            trip_id=trip_id,
+            current_stop_id=current_stop_id,
+        ):
             continue
 
         if v.get("distance_km") is None:
@@ -459,16 +469,9 @@ def get_fused_buses(route_key):
     now_minutes = now.hour * 60 + now.minute
 
     vehicles = realtime["vehicles"]
-
     used_vehicle_ids = set()
 
     for bus in buses:
-        matched = find_nearest_scheduled_bus(
-            buses=buses,
-            route_key=bus["route_key"],
-            now_minutes=now_minutes,
-        )
-
         for vehicle in vehicles:
             if vehicle.get("vehicle_id") in used_vehicle_ids:
                 continue
