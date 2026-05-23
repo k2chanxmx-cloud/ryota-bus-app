@@ -75,11 +75,11 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0030-01,,阿佐ヶ谷南一丁目,,35.701366,139.636037,0030-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=30,0,0030,,,,1
 0030-02,,阿佐ヶ谷南一丁目,,35.702041,139.636018,0030-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=30,0,0030,,,,1
 0032,,浅草雷門,東京メトロ銀座線 浅草:東武スカイツリーライン 浅草:都営浅草線 浅草,35.711106,139.79535,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,1,,,,,
-0032-01,,浅草雷門,都営浅草線 浅草:東武スカイツリーライン 浅草:東京メトロ銀座線 浅草,35.711106,139.79535,0032-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,3,1
+0032-01,,浅草雷門,東武スカイツリーライン 浅草:都営浅草線 浅草:東京メトロ銀座線 浅草,35.711106,139.79535,0032-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,3,1
 0032-02,,浅草雷門,都営浅草線 浅草:東武スカイツリーライン 浅草:東京メトロ銀座線 浅草,35.711142,139.795039,0032-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,2,1
-0032-03,,浅草雷門,東武スカイツリーライン 浅草:都営浅草線 浅草:東京メトロ銀座線 浅草,35.710941,139.795197,0032-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,4,1
-0032-04,,浅草雷門,都営浅草線 浅草:東武スカイツリーライン 浅草:東京メトロ銀座線 浅草,35.710902,139.795536,0032-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,5,1
-0032-05,,浅草雷門,都営浅草線 浅草:東京メトロ銀座線 浅草:東武スカイツリーライン 浅草,35.71022,139.796312,0032-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,8,1
+0032-03,,浅草雷門,都営浅草線 浅草:東京メトロ銀座線 浅草:東武スカイツリーライン 浅草,35.710941,139.795197,0032-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,4,1
+0032-04,,浅草雷門,都営浅草線 浅草:東京メトロ銀座線 浅草:東武スカイツリーライン 浅草,35.710902,139.795536,0032-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,5,1
+0032-05,,浅草雷門,東武スカイツリーライン 浅草:東京メトロ銀座線 浅草:都営浅草線 浅草,35.71022,139.796312,0032-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,8,1
 0032-06,,浅草雷門,東京メトロ銀座線 浅草:東武スカイツリーライン 浅草:都営浅草線 浅草,35.710218,139.7961,0032-06,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,6,1
 0032-08,,浅草雷門,都営浅草線 浅草:東武スカイツリーライン 浅草:東京メトロ銀座線 浅草,35.710735,139.796788,0032-08,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=32,0,0032,,,,1
 0033,,浅草警察署前,,35.719064,139.799491,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=33,1,,,,,
@@ -197,16 +197,16 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0077,,有明二丁目,,35.639442,139.792794,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=77,1,,,,,
 0077-01,,有明二丁目,,35.639442,139.792794,0077-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=77,0,0077,,,,1
 0077-02,,有明二丁目,,35.638672,139.791799,0077-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=77,0,0077,,,,1
-0078,,飯田橋駅前,東京メトロ南北線 飯田橋:東京メトロ有楽町線 飯田橋:都営大江戸線 飯田橋:東京メトロ東西線 飯田橋,35.701551,139.745988,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=78,1,,,,,
-0078-05,,飯田橋駅前,東京メトロ東西線 飯田橋:都営大江戸線 飯田橋:東京メトロ南北線 飯田橋:東京メトロ有楽町線 飯田橋,35.701551,139.745988,0078-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=78,0,0078,,,5,1
-0078-06,,飯田橋駅前,東京メトロ東西線 飯田橋:東京メトロ南北線 飯田橋:都営大江戸線 飯田橋:東京メトロ有楽町線 飯田橋,35.701671,139.746177,0078-06,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=78,0,0078,,,6,1
+0078,,飯田橋駅前,都営大江戸線 飯田橋:東京メトロ南北線 飯田橋:東京メトロ東西線 飯田橋:東京メトロ有楽町線 飯田橋,35.701551,139.745988,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=78,1,,,,,
+0078-05,,飯田橋駅前,東京メトロ東西線 飯田橋:東京メトロ南北線 飯田橋:都営大江戸線 飯田橋:東京メトロ有楽町線 飯田橋,35.701551,139.745988,0078-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=78,0,0078,,,5,1
+0078-06,,飯田橋駅前,都営大江戸線 飯田橋:東京メトロ南北線 飯田橋:東京メトロ東西線 飯田橋:東京メトロ有楽町線 飯田橋,35.701671,139.746177,0078-06,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=78,0,0078,,,6,1
 0079,,飯田橋,ＪＲ中央線 飯田橋,35.703257,139.744333,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=79,1,,,,,
 0079-01,,飯田橋,ＪＲ中央線 飯田橋,35.703257,139.744333,0079-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=79,0,0079,,,1,1
 0079-02,,飯田橋,ＪＲ中央線 飯田橋,35.703496,139.744932,0079-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=79,0,0079,,,2,1
 0079-03,,飯田橋,ＪＲ中央線 飯田橋,35.702878,139.743308,0079-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=79,0,0079,,,3,1
 0079-04,,飯田橋,ＪＲ中央線 飯田橋,35.702642,139.743812,0079-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=79,0,0079,,,4,1
-0080,,都営飯田橋駅前,東京メトロ南北線 飯田橋:都営大江戸線 飯田橋,35.703932,139.746822,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=80,1,,,,,
-0080-07,,都営飯田橋駅前,都営大江戸線 飯田橋:東京メトロ南北線 飯田橋,35.703932,139.746822,0080-07,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=80,0,0080,,,7,1
+0080,,都営飯田橋駅前,都営大江戸線 飯田橋:東京メトロ南北線 飯田橋,35.703932,139.746822,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=80,1,,,,,
+0080-07,,都営飯田橋駅前,東京メトロ南北線 飯田橋:都営大江戸線 飯田橋,35.703932,139.746822,0080-07,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=80,0,0080,,,7,1
 0081,,飯田橋一丁目,,35.699141,139.748958,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=81,1,,,,,
 0081-01,,飯田橋一丁目,,35.699141,139.748958,0081-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=81,0,0081,,,,1
 0081-02,,飯田橋一丁目,,35.69953,139.74893,0081-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=81,0,0081,,,,1
@@ -222,20 +222,20 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0086,,池之端二丁目,,35.714984,139.767435,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=86,1,,,,,
 0086-01,,池之端二丁目,,35.714984,139.767435,0086-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=86,0,0086,,,,1
 0086-02,,池之端二丁目,,35.715209,139.767519,0086-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=86,0,0086,,,,1
-0087,,池袋駅東口,東京メトロ丸ノ内線 池袋:東京メトロ副都心線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:東武東上線 池袋:東京メトロ有楽町線 池袋:西武池袋線 池袋,35.72909,139.71202,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,1,,,,,
-0087-01,,池袋駅東口,東京メトロ有楽町線 池袋:東武東上線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:東京メトロ丸ノ内線 池袋:西武池袋線 池袋:東京メトロ副都心線 池袋,35.72909,139.71202,0087-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,1,1
-0087-02,,池袋駅東口,ＪＲ埼京線 池袋:東京メトロ副都心線 池袋:ＪＲ山手線 池袋:東京メトロ丸ノ内線 池袋:西武池袋線 池袋:東武東上線 池袋:東京メトロ有楽町線 池袋,35.729054,139.712241,0087-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,2,1
-0087-03,,池袋駅東口,東武東上線 池袋:東京メトロ副都心線 池袋:東京メトロ有楽町線 池袋:東京メトロ丸ノ内線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:西武池袋線 池袋,35.729523,139.713109,0087-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
-0087-04,,池袋駅東口,ＪＲ山手線 池袋:西武池袋線 池袋:ＪＲ埼京線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ副都心線 池袋:東武東上線 池袋:東京メトロ有楽町線 池袋,35.729609,139.713017,0087-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,4,1
-0087-05,,池袋駅東口,東京メトロ有楽町線 池袋:西武池袋線 池袋:東武東上線 池袋:東京メトロ副都心線 池袋:ＪＲ山手線 池袋:東京メトロ丸ノ内線 池袋:ＪＲ埼京線 池袋,35.729777,139.713206,0087-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,5,1
-0087-06,,池袋駅東口,ＪＲ埼京線 池袋:東京メトロ丸ノ内線 池袋:ＪＲ山手線 池袋:西武池袋線 池袋:東武東上線 池袋:東京メトロ副都心線 池袋:東京メトロ有楽町線 池袋,35.729612,139.713464,0087-06,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,6,1
-0087-07,,池袋駅東口,ＪＲ山手線 池袋:東京メトロ副都心線 池袋:ＪＲ埼京線 池袋:東京メトロ有楽町線 池袋:東武東上線 池袋:西武池袋線 池袋:東京メトロ丸ノ内線 池袋,35.729488,139.713705,0087-07,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,7,1
-0087-11,,池袋駅東口,西武池袋線 池袋:東武東上線 池袋:東京メトロ有楽町線 池袋:ＪＲ山手線 池袋:ＪＲ埼京線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ副都心線 池袋,35.730832,139.712674,0087-11,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,11,1
-0087-12,,池袋駅東口,西武池袋線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ有楽町線 池袋:ＪＲ山手線 池袋:ＪＲ埼京線 池袋:東京メトロ副都心線 池袋:東武東上線 池袋,35.730954,139.712707,0087-12,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,12,1
-0087-13,,池袋駅東口,東京メトロ有楽町線 池袋:ＪＲ埼京線 池袋:西武池袋線 池袋:東武東上線 池袋:ＪＲ山手線 池袋:東京メトロ副都心線 池袋:東京メトロ丸ノ内線 池袋,35.731063,139.712739,0087-13,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,13,1
-0087-14,,池袋駅東口,東武東上線 池袋:西武池袋線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ有楽町線 池袋:東京メトロ副都心線 池袋,35.731527,139.713363,0087-14,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
-0087-15,,池袋駅東口,東京メトロ副都心線 池袋:東京メトロ有楽町線 池袋:ＪＲ山手線 池袋:西武池袋線 池袋:東京メトロ丸ノ内線 池袋:ＪＲ埼京線 池袋:東武東上線 池袋,35.730774,139.713106,0087-15,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
-0087-16,,池袋駅東口,東京メトロ副都心線 池袋:西武池袋線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ有楽町線 池袋:ＪＲ埼京線 池袋:東武東上線 池袋:ＪＲ山手線 池袋,35.730957,139.71307,0087-16,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
+0087,,池袋駅東口,西武池袋線 池袋:東京メトロ有楽町線 池袋:東武東上線 池袋:東京メトロ副都心線 池袋:東京メトロ丸ノ内線 池袋:ＪＲ山手線 池袋:ＪＲ埼京線 池袋,35.72909,139.71202,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,1,,,,,
+0087-01,,池袋駅東口,ＪＲ山手線 池袋:西武池袋線 池袋:ＪＲ埼京線 池袋:東京メトロ有楽町線 池袋:東京メトロ副都心線 池袋:東武東上線 池袋:東京メトロ丸ノ内線 池袋,35.72909,139.71202,0087-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,1,1
+0087-02,,池袋駅東口,東京メトロ有楽町線 池袋:ＪＲ山手線 池袋:ＪＲ埼京線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ副都心線 池袋:西武池袋線 池袋:東武東上線 池袋,35.728977,139.71223,0087-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,2,1
+0087-03,,池袋駅東口,東武東上線 池袋:ＪＲ山手線 池袋:西武池袋線 池袋:ＪＲ埼京線 池袋:東京メトロ副都心線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ有楽町線 池袋,35.729523,139.713109,0087-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
+0087-04,,池袋駅東口,東京メトロ副都心線 池袋:東武東上線 池袋:東京メトロ有楽町線 池袋:ＪＲ山手線 池袋:西武池袋線 池袋:ＪＲ埼京線 池袋:東京メトロ丸ノ内線 池袋,35.729609,139.713017,0087-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,4,1
+0087-05,,池袋駅東口,東京メトロ丸ノ内線 池袋:ＪＲ埼京線 池袋:東武東上線 池袋:ＪＲ山手線 池袋:東京メトロ副都心線 池袋:西武池袋線 池袋:東京メトロ有楽町線 池袋,35.729777,139.713206,0087-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,5,1
+0087-06,,池袋駅東口,東京メトロ丸ノ内線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:東武東上線 池袋:西武池袋線 池袋:東京メトロ有楽町線 池袋:東京メトロ副都心線 池袋,35.729612,139.713464,0087-06,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,6,1
+0087-07,,池袋駅東口,東武東上線 池袋:ＪＲ埼京線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ有楽町線 池袋:東京メトロ副都心線 池袋:西武池袋線 池袋:ＪＲ山手線 池袋,35.729488,139.713705,0087-07,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,7,1
+0087-11,,池袋駅東口,東京メトロ有楽町線 池袋:西武池袋線 池袋:東京メトロ丸ノ内線 池袋:ＪＲ山手線 池袋:東武東上線 池袋:東京メトロ副都心線 池袋:ＪＲ埼京線 池袋,35.730832,139.712674,0087-11,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,11,1
+0087-12,,池袋駅東口,東京メトロ丸ノ内線 池袋:西武池袋線 池袋:東武東上線 池袋:東京メトロ副都心線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:東京メトロ有楽町線 池袋,35.730954,139.712707,0087-12,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,12,1
+0087-13,,池袋駅東口,東京メトロ丸ノ内線 池袋:ＪＲ埼京線 池袋:東武東上線 池袋:ＪＲ山手線 池袋:東京メトロ副都心線 池袋:東京メトロ有楽町線 池袋:西武池袋線 池袋,35.731063,139.712739,0087-13,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,13,1
+0087-14,,池袋駅東口,西武池袋線 池袋:東京メトロ副都心線 池袋:東京メトロ丸ノ内線 池袋:東武東上線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:東京メトロ有楽町線 池袋,35.731527,139.713363,0087-14,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
+0087-15,,池袋駅東口,西武池袋線 池袋:東京メトロ丸ノ内線 池袋:東京メトロ有楽町線 池袋:ＪＲ埼京線 池袋:ＪＲ山手線 池袋:東京メトロ副都心線 池袋:東武東上線 池袋,35.730774,139.713106,0087-15,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
+0087-16,,池袋駅東口,ＪＲ埼京線 池袋:西武池袋線 池袋:東京メトロ丸ノ内線 池袋:東武東上線 池袋:ＪＲ山手線 池袋:東京メトロ副都心線 池袋:東京メトロ有楽町線 池袋,35.730957,139.71307,0087-16,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=87,0,0087,,,,1
 0089,,東池袋二丁目,,35.731637,139.720569,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=89,1,,,,,
 0089-01,,東池袋二丁目,,35.731637,139.720569,0089-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=89,0,0089,,,,1
 0089-02,,東池袋二丁目,,35.731609,139.720208,0089-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=89,0,0089,,,,1
@@ -306,7 +306,7 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0110,,一之江七丁目,,35.687236,139.877141,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=110,1,,,,,
 0110-01,,一之江七丁目,,35.687236,139.877141,0110-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=110,0,0110,,,,1
 0110-02,,一之江七丁目,,35.686976,139.87714,0110-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=110,0,0110,,,,1
-0111,,麻布十番駅前,都営大江戸線 麻布十番:東京メトロ南北線 麻布十番,35.655673,139.736946,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=111,1,,,,,
+0111,,麻布十番駅前,東京メトロ南北線 麻布十番:都営大江戸線 麻布十番,35.655673,139.736946,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=111,1,,,,,
 0111-01,,麻布十番駅前,東京メトロ南北線 麻布十番:都営大江戸線 麻布十番,35.655673,139.736946,0111-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=111,0,0111,,,2,1
 0111-03,,麻布十番駅前,都営大江戸線 麻布十番:東京メトロ南北線 麻布十番,35.65456,139.737166,0111-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=111,0,0111,,,3,1
 0111-04,,麻布十番駅前,東京メトロ南北線 麻布十番:都営大江戸線 麻布十番,35.654359,139.736794,0111-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=111,0,0111,,,4,1
@@ -350,9 +350,9 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0129-01,,岩本町一丁目,,35.692237,139.777245,0129-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=129,0,0129,,,,1
 0131,,上野駅前,東京メトロ銀座線 上野:ＪＲ宇都宮線高崎線 上野:ＪＲ新幹線 上野:ＪＲ常磐線 上野:東京メトロ日比谷線 上野:ＪＲ京浜東北線 上野:京成本線 京成上野:ＪＲ山手線 上野,35.71197,139.777124,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,1,,,,,
 0131-01,,上野駅前,ＪＲ新幹線 上野:京成本線 京成上野:ＪＲ常磐線 上野:東京メトロ日比谷線 上野:ＪＲ山手線 上野:ＪＲ京浜東北線 上野:ＪＲ宇都宮線高崎線 上野:東京メトロ銀座線 上野,35.71197,139.777124,0131-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,0,0131,,,1,1
-0131-02,,上野駅前,ＪＲ新幹線 上野:東京メトロ銀座線 上野:ＪＲ宇都宮線高崎線 上野:ＪＲ山手線 上野:ＪＲ常磐線 上野:京成本線 京成上野:ＪＲ京浜東北線 上野:東京メトロ日比谷線 上野,35.711829,139.776905,0131-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,0,0131,,,2,1
-0131-03,,上野駅前,ＪＲ宇都宮線高崎線 上野:ＪＲ新幹線 上野:京成本線 京成上野:ＪＲ常磐線 上野:東京メトロ銀座線 上野:東京メトロ日比谷線 上野:ＪＲ山手線 上野:ＪＲ京浜東北線 上野,35.711766,139.776802,0131-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,0,0131,,,3,1
-0131-05,,上野駅前,ＪＲ新幹線 上野:ＪＲ宇都宮線高崎線 上野:ＪＲ京浜東北線 上野:東京メトロ銀座線 上野:ＪＲ常磐線 上野:ＪＲ山手線 上野:東京メトロ日比谷線 上野:京成本線 京成上野,35.711432,139.775325,0131-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,0,0131,,,5,1
+0131-02,,上野駅前,ＪＲ山手線 上野:京成本線 京成上野:ＪＲ宇都宮線高崎線 上野:ＪＲ常磐線 上野:ＪＲ新幹線 上野:東京メトロ銀座線 上野:ＪＲ京浜東北線 上野:東京メトロ日比谷線 上野,35.711829,139.776905,0131-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,0,0131,,,2,1
+0131-03,,上野駅前,東京メトロ銀座線 上野:ＪＲ京浜東北線 上野:ＪＲ新幹線 上野:ＪＲ常磐線 上野:ＪＲ宇都宮線高崎線 上野:東京メトロ日比谷線 上野:ＪＲ山手線 上野:京成本線 京成上野,35.711766,139.776802,0131-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,0,0131,,,3,1
+0131-05,,上野駅前,ＪＲ新幹線 上野:ＪＲ宇都宮線高崎線 上野:東京メトロ日比谷線 上野:ＪＲ京浜東北線 上野:東京メトロ銀座線 上野:ＪＲ常磐線 上野:京成本線 京成上野:ＪＲ山手線 上野,35.711432,139.775325,0131-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=131,0,0131,,,5,1
 0132,,上野公園,,35.709784,139.77191,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=132,1,,,,,
 0132-08,,上野公園,,35.709784,139.77191,0132-08,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=132,0,0132,,,10,1
 0132-09,,上野公園,,35.709731,139.771579,0132-09,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=132,0,0132,,,11,1
@@ -367,8 +367,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0134-01,,上野桜木,,35.722632,139.774398,0134-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=134,0,0134,,,,1
 0134-02,,上野桜木,,35.722623,139.77421,0134-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=134,0,0134,,,,1
 0135,,上野広小路,都営大江戸線 上野御徒町:東京メトロ銀座線 上野広小路,35.7087,139.773104,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=135,1,,,,,
-0135-05,,上野広小路,東京メトロ銀座線 上野広小路:都営大江戸線 上野御徒町,35.7087,139.773104,0135-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=135,0,0135,,,5,1
-0135-08,,上野広小路,都営大江戸線 上野御徒町:東京メトロ銀座線 上野広小路,35.708187,139.771968,0135-08,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=135,0,0135,,,10,1
+0135-05,,上野広小路,都営大江戸線 上野御徒町:東京メトロ銀座線 上野広小路,35.7087,139.773104,0135-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=135,0,0135,,,5,1
+0135-08,,上野広小路,東京メトロ銀座線 上野広小路:都営大江戸線 上野御徒町,35.708187,139.771968,0135-08,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=135,0,0135,,,10,1
 0135-09,,上野広小路,都営大江戸線 上野御徒町:東京メトロ銀座線 上野広小路,35.707992,139.772281,0135-09,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=135,0,0135,,,11,1
 0136,,宇喜田,,35.670171,139.857611,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=136,1,,,,,
 0136-01,,宇喜田,,35.670171,139.857611,0136-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=136,0,0136,,,,1
@@ -377,7 +377,7 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0136-04,,宇喜田,,35.669621,139.856475,0136-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=136,0,0136,,,,1
 0137,,鶯谷駅前,ＪＲ山手線 鶯谷:ＪＲ京浜東北線 鶯谷,35.7224,139.779357,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=137,1,,,,,
 0137-01,,鶯谷駅前,ＪＲ山手線 鶯谷:ＪＲ京浜東北線 鶯谷,35.7224,139.779357,0137-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=137,0,0137,,,1,1
-0137-02,,鶯谷駅前,ＪＲ山手線 鶯谷:ＪＲ京浜東北線 鶯谷,35.722753,139.779414,0137-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=137,0,0137,,,2,1
+0137-02,,鶯谷駅前,ＪＲ京浜東北線 鶯谷:ＪＲ山手線 鶯谷,35.722753,139.779414,0137-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=137,0,0137,,,2,1
 0138,,牛込北町,,35.699541,139.732428,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=138,1,,,,,
 0138-01,,牛込北町,,35.699541,139.732428,0138-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=138,0,0138,,,,1
 0138-02,,牛込北町,,35.699685,139.732508,0138-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=138,0,0138,,,,1
@@ -452,8 +452,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 0163,,江古田一丁目,,35.724053,139.669879,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=163,1,,,,,
 0163-01,,江古田一丁目,,35.724053,139.669879,0163-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=163,0,0163,,,,1
 0163-02,,江古田一丁目,,35.72376,139.67173,0163-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=163,0,0163,,,,1
-0164,,江古田二丁目,,35.72392,139.666727,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=164,1,,,,,
-0164-01,,江古田二丁目,,35.72392,139.666727,0164-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=164,0,0164,,,,1
+0164,,江古田二丁目,,35.723967,139.666855,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=164,1,,,,,
+0164-01,,江古田二丁目,,35.723967,139.666855,0164-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=164,0,0164,,,,1
 0164-02,,江古田二丁目,,35.723836,139.66651,0164-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=164,0,0164,,,,1
 0165,,江古田三丁目,,35.725906,139.66773,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=165,1,,,,,
 0165-01,,江古田三丁目,,35.725906,139.66773,0165-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=165,0,0165,,,,1
@@ -3141,12 +3141,12 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 1177,,日曹橋,,35.670773,139.825836,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1177,1,,,,,
 1177-01,,日曹橋,,35.670773,139.825836,1177-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1177,0,1177,,,,1
 1177-02,,日曹橋,,35.671081,139.826125,1177-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1177,0,1177,,,,1
-1178,,日暮里駅前,ＪＲ山手線 日暮里:ＪＲ京浜東北線 日暮里:ＪＲ常磐線 日暮里:京成本線 日暮里:日暮里・舎人ライナー 日暮里,35.728402,139.7717,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,1,,,,,
-1178-01,,日暮里駅前,ＪＲ常磐線 日暮里:京成本線 日暮里:日暮里・舎人ライナー 日暮里:ＪＲ京浜東北線 日暮里:ＪＲ山手線 日暮里,35.728402,139.7717,1178-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,1,1
-1178-02,,日暮里駅前,ＪＲ山手線 日暮里:ＪＲ常磐線 日暮里:ＪＲ京浜東北線 日暮里:日暮里・舎人ライナー 日暮里:京成本線 日暮里,35.728649,139.771493,1178-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,2,1
-1178-03,,日暮里駅前,ＪＲ常磐線 日暮里:日暮里・舎人ライナー 日暮里:ＪＲ山手線 日暮里:京成本線 日暮里:ＪＲ京浜東北線 日暮里,35.729028,139.771154,1178-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,3,1
-1178-04,,日暮里駅前,ＪＲ京浜東北線 日暮里:京成本線 日暮里:ＪＲ常磐線 日暮里:ＪＲ山手線 日暮里:日暮里・舎人ライナー 日暮里,35.729179,139.77186,1178-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,,1
-1178-05,,日暮里駅前,ＪＲ京浜東北線 日暮里:ＪＲ山手線 日暮里:ＪＲ常磐線 日暮里:日暮里・舎人ライナー 日暮里:京成本線 日暮里,35.728375,139.771495,1178-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,,1
+1178,,日暮里駅前,ＪＲ京浜東北線 日暮里:ＪＲ山手線 日暮里:京成本線 日暮里:ＪＲ常磐線 日暮里:日暮里・舎人ライナー 日暮里,35.728402,139.7717,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,1,,,,,
+1178-01,,日暮里駅前,京成本線 日暮里:ＪＲ常磐線 日暮里:ＪＲ山手線 日暮里:ＪＲ京浜東北線 日暮里:日暮里・舎人ライナー 日暮里,35.728402,139.7717,1178-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,1,1
+1178-02,,日暮里駅前,ＪＲ常磐線 日暮里:ＪＲ山手線 日暮里:京成本線 日暮里:日暮里・舎人ライナー 日暮里:ＪＲ京浜東北線 日暮里,35.728649,139.771493,1178-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,2,1
+1178-03,,日暮里駅前,ＪＲ山手線 日暮里:ＪＲ常磐線 日暮里:京成本線 日暮里:ＪＲ京浜東北線 日暮里:日暮里・舎人ライナー 日暮里,35.729028,139.771154,1178-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,3,1
+1178-04,,日暮里駅前,ＪＲ京浜東北線 日暮里:京成本線 日暮里:ＪＲ山手線 日暮里:日暮里・舎人ライナー 日暮里:ＪＲ常磐線 日暮里,35.729179,139.77186,1178-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,,1
+1178-05,,日暮里駅前,ＪＲ京浜東北線 日暮里:ＪＲ山手線 日暮里:日暮里・舎人ライナー 日暮里:ＪＲ常磐線 日暮里:京成本線 日暮里,35.728375,139.771495,1178-05,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1178,0,1178,,,,1
 1179,,二天門,,35.714484,139.798187,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1179,1,,,,,
 1179-01,,二天門,,35.714484,139.798187,1179-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1179,0,1179,,,,1
 1179-02,,二天門,,35.714587,139.798425,1179-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1179,0,1179,,,,1
@@ -3190,9 +3190,9 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 1192-02,,根津神社入口,,35.720314,139.762861,1192-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1192,0,1192,,,,1
 1197,,練馬車庫前,,35.738478,139.664866,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,1,,,,,
 1197-01,,練馬車庫前,,35.738478,139.664866,1197-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,0,1197,,,,1
-1197-02,,練馬車庫前,,35.738333,139.664694,1197-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,0,1197,,,,1
-1197-03,,練馬車庫前,,35.738301,139.664019,1197-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,0,1197,,,,1
-1197-04,,練馬車庫前,,35.738366,139.664658,1197-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,0,1197,,,,1
+1197-02,,練馬車庫前,,35.738312,139.663505,1197-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,0,1197,,,,1
+1197-03,,練馬車庫前,,35.738288,139.663949,1197-03,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,0,1197,,,,1
+1197-04,,練馬車庫前,,35.738365,139.664657,1197-04,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1197,0,1197,,,,1
 1199,,青梅総合高校入口,,35.790597,139.268276,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1199,1,,,,,
 1199-01,,青梅総合高校入口,,35.790597,139.268276,1199-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1199,0,1199,,,,1
 1199-02,,青梅総合高校入口,,35.79045,139.268179,1199-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1199,0,1199,,,,1
@@ -3886,8 +3886,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,locatio
 1477,,南砂六丁目,,35.671092,139.834175,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1477,1,,,,,
 1477-07,,南砂六丁目,,35.671092,139.834175,1477-07,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1477,0,1477,,,9,1
 1477-08,,南砂六丁目,,35.670924,139.83442,1477-08,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1477,0,1477,,,10,1
-1478,,南千住車庫前,ＪＲ常磐線 南千住:東京メトロ日比谷線 南千住:つくばエクスプレス 南千住,35.731309,139.798424,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1478,1,,,,,
-1478-01,,南千住車庫前,つくばエクスプレス 南千住:東京メトロ日比谷線 南千住:ＪＲ常磐線 南千住,35.731309,139.798424,1478-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1478,0,1478,,,,1
+1478,,南千住車庫前,つくばエクスプレス 南千住:ＪＲ常磐線 南千住:東京メトロ日比谷線 南千住,35.731309,139.798424,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1478,1,,,,,
+1478-01,,南千住車庫前,東京メトロ日比谷線 南千住:つくばエクスプレス 南千住:ＪＲ常磐線 南千住,35.731309,139.798424,1478-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1478,0,1478,,,,1
 1478-02,,南千住車庫前,ＪＲ常磐線 南千住:つくばエクスプレス 南千住:東京メトロ日比谷線 南千住,35.73082,139.798447,1478-02,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1478,0,1478,,,,1
 1479,,隅田川貨物駅前,,35.730311,139.800673,,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1479,1,,,,,
 1479-01,,隅田川貨物駅前,,35.730311,139.800673,1479-01,https://tobus.jp/blsys/navi?LCD=&VCD=cresultrsi&ECD=aprslt&slst=1479,0,1479,,,,1
