@@ -29,7 +29,6 @@ DESTINATION_NAME = "亀戸駅前"
 def normalize_stop_id(stop_id):
     if not stop_id:
         return ""
-
     return stop_id.split("-")[0]
 
 
@@ -74,7 +73,6 @@ def load_stops():
 def load_trips():
     trips = {}
     target_trip_ids = set()
-
     target_route_ids = set(ROUTE_IDS.values())
 
     for row in read_csv_rows(TRIPS_FILE) or []:
@@ -204,7 +202,6 @@ def is_kameido_direction(trip_id):
 def get_direction_label(trip_id):
     if is_kameido_direction(trip_id):
         return "亀戸駅前方面"
-
     return "反対方面"
 
 
@@ -236,11 +233,10 @@ def find_stop_index_by_name(stops, stop_name):
     return None
 
 
-def is_valid_bus_for_target_stop(
+def is_before_or_at_target_stop(
     trip_id,
     current_stop_id,
     target_stop_name=TARGET_STOP_NAME,
-    destination_name=DESTINATION_NAME,
 ):
     stops = get_trip_stops(trip_id)
 
@@ -249,31 +245,21 @@ def is_valid_bus_for_target_stop(
 
     current_index = find_stop_index_by_stop_id(stops, current_stop_id)
     target_index = find_stop_index_by_name(stops, target_stop_name)
-    destination_index = find_stop_index_by_name(stops, destination_name)
 
     if target_index is None:
         return False
 
-    if destination_index is None:
-        return False
-
-    # 亀戸七丁目 → 亀戸駅前 の順で走る便だけ採用
-    if not target_index < destination_index:
-        return False
-
-    # 現在停留所が取れない場合は、方向と経路だけで一旦採用
     if current_index is None:
         return True
 
-    # まだ亀戸七丁目に到達していない、または亀戸七丁目停車中の便だけ採用
-    if current_index <= target_index:
-        return True
-
-    return False
+    return current_index <= target_index
 
 
 def build_progress_stops(stops, current_index, target_index, window=2):
     if not stops:
+        return []
+
+    if current_index is None and target_index is None:
         return []
 
     center = current_index if current_index is not None else target_index
@@ -281,10 +267,9 @@ def build_progress_stops(stops, current_index, target_index, window=2):
     if center is None:
         return []
 
-    # 現在地から目的停留所までを見せたいので、target_index が先にあるなら含める
     start = max(0, center - window)
 
-    if target_index is not None and target_index > center:
+    if target_index is not None and target_index >= center:
         end = min(len(stops), target_index + 3)
     else:
         end = min(len(stops), center + window + 3)
@@ -331,6 +316,7 @@ def get_bus_location_status(
             "remaining_stop_count": None,
             "status_text": "接近中",
             "progress_stops": [],
+            "passed_target": False,
         }
 
     current_index = find_stop_index_by_stop_id(stops, current_stop_id)
@@ -340,45 +326,33 @@ def get_bus_location_status(
         return {
             "current_stop_name": current_stop_name,
             "remaining_stop_count": None,
-            "status_text": "接近中",
-            "progress_stops": build_progress_stops(
-                stops,
-                current_index,
-                target_index,
-            ),
+            "status_text": f"{target_stop_name}へ接近中",
+            "progress_stops": build_progress_stops(stops, current_index, target_index),
+            "passed_target": False,
         }
 
     remaining = target_index - current_index
+    passed_target = remaining < 0
 
     if remaining > 1:
-        status_text = f"あと{remaining}停留所"
-
+        status_text = f"{target_stop_name}まであと{remaining}停留所"
     elif remaining == 1:
-        status_text = "次の停留所"
-
+        status_text = f"次は{target_stop_name}"
     elif remaining == 0:
-        status_text = "まもなく到着"
-
+        status_text = f"{target_stop_name}に到着間近"
     else:
-        status_text = "通過済み"
+        status_text = f"{target_stop_name}通過済み"
 
     return {
-    "current_stop_name": current_stop_name,
-    "remaining_stop_count": (
-        remaining_count
-        if remaining_count is not None
-        else 999
-    ),
-    "status_text": status_text,
-    "progress_stops": progress_stops,
+        "current_stop_name": current_stop_name,
+        "remaining_stop_count": remaining,
+        "status_text": status_text,
+        "progress_stops": build_progress_stops(stops, current_index, target_index),
+        "passed_target": passed_target,
     }
 
 
-def find_nearest_scheduled_bus(
-    buses,
-    route_key,
-    now_minutes,
-):
+def find_nearest_scheduled_bus(buses, route_key, now_minutes):
     candidates = []
 
     for bus in buses:
@@ -403,7 +377,6 @@ def find_nearest_scheduled_bus(
         return None
 
     candidates.sort(key=lambda x: x["abs_diff"])
-
     return candidates[0]["bus"]
 
 
