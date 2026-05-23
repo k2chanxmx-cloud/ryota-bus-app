@@ -421,11 +421,11 @@ def get_realtime_buses(route_key):
         if not is_target_direction(trip_id):
             continue
 
-        if not is_valid_bus_for_target_stop(
-            trip_id=trip_id,
-            current_stop_id=current_stop_id,
-        ):
-            continue
+#         if not is_valid_bus_for_target_stop(
+#             trip_id=trip_id,
+#             current_stop_id=current_stop_id,
+#         ):
+#           continue
 
         if v.get("distance_km") is None:
             continue
