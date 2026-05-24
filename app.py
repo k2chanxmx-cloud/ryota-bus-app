@@ -11,7 +11,6 @@ from gtfs_utils import (
     get_direction_label,
     get_bus_location_status,
     get_debug_status,
-    is_before_or_at_target_stop,
 )
 
 app = Flask(__name__)
@@ -27,10 +26,51 @@ TARGET_LOCATION = {
 
 SEARCH_RADIUS_KM = 3.5
 
+ROUTE_STOP_WHITELIST = {
+    "nishi25": [
+        "大島八丁目",
+        "大島七丁目",
+        "中の橋通り",
+        "大島駅前",
+        "大島三丁目",
+        "西大島駅前",
+        "五ノ橋",
+        "亀戸駅通り",
+        "亀戸駅前",
+    ],
+    "nishi27": [
+        "旧葛西橋",
+        "東砂四丁目",
+        "亀高橋",
+        "北砂四丁目",
+        "境川",
+        "北砂二丁目",
+        "大島一丁目",
+        "西大島駅前",
+        "五ノ橋",
+        "亀戸駅通り",
+        "亀戸駅前",
+    ],
+    "kame26": [
+        "旧葛西橋",
+        "東砂四丁目",
+        "亀高橋",
+        "北砂七丁目",
+        "北砂五丁目",
+        "北砂六丁目",
+        "大島五丁目",
+        "大島駅前",
+        "城東特別支援学校前",
+        "竪川大橋北詰",
+        "亀戸六丁目",
+        "水神森",
+        "亀戸駅前",
+    ],
+}
+
 
 def distance_km(lat1, lon1, lat2, lon2):
     r = 6371.0
-
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
 
@@ -42,7 +82,6 @@ def distance_km(lat1, lon1, lat2, lon2):
     )
 
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
     return r * c
 
 
@@ -50,7 +89,6 @@ def get_route_key(route_id):
     for key, value in ROUTE_IDS.items():
         if value == route_id:
             return key
-
     return None
 
 
@@ -69,7 +107,6 @@ def fetch_toei_realtime():
             params={"acl:consumerKey": ODPT_API_KEY},
             timeout=15,
         )
-
         res.raise_for_status()
 
         feed = gtfs_realtime_pb2.FeedMessage()
@@ -144,7 +181,6 @@ def fetch_toei_realtime():
 
     except Exception as e:
         print("REALTIME FETCH ERROR =", str(e))
-
         return {
             "ok": False,
             "reason": str(e),
@@ -167,8 +203,16 @@ def get_realtime_buses():
     buses = []
 
     for v in realtime["vehicles"]:
+        route_key = v.get("route_key")
+        current_stop_name = v.get("current_stop_name", "")
 
-        if not v.get("route_key"):
+        if not route_key:
+            continue
+
+        if route_key not in ROUTE_STOP_WHITELIST:
+            continue
+
+        if current_stop_name not in ROUTE_STOP_WHITELIST[route_key]:
             continue
 
         if v.get("distance_km") is None:
@@ -177,28 +221,12 @@ def get_realtime_buses():
         if v["distance_km"] > SEARCH_RADIUS_KM:
             continue
 
-        # 亀戸七丁目をこれから通る便だけ
-        if not is_before_or_at_target_stop(
-            trip_id=v.get("trip_id", ""),
-            current_stop_id=v.get("stop_id", ""),
-            target_stop_name=TARGET_LOCATION["name"],
-        ):
-            continue
-
-        # 亀戸七丁目を通過済みなら除外
-        if v.get("passed_target"):
-            continue
-
         buses.append(v)
 
     buses.sort(
         key=lambda x: (
-            x.get("remaining_stop_count")
-            if x.get("remaining_stop_count") is not None
-            else 999,
-            x.get("distance_km")
-            if x.get("distance_km") is not None
-            else 999,
+            x.get("distance_km") if x.get("distance_km") is not None else 999,
+            x.get("route_label", ""),
         )
     )
 
@@ -245,6 +273,7 @@ def realtime_debug():
             "longitude": TARGET_LOCATION["longitude"],
             "search_radius_km": SEARCH_RADIUS_KM,
         },
+        "whitelist": ROUTE_STOP_WHITELIST,
     })
 
 
