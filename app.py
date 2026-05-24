@@ -8,7 +8,6 @@ from google.transit import gtfs_realtime_pb2
 from gtfs_utils import (
     ROUTE_IDS,
     get_route_label,
-    get_direction_label,
     get_bus_location_status,
     get_debug_status,
 )
@@ -26,9 +25,9 @@ TARGET_LOCATION = {
 
 SEARCH_RADIUS_KM = 3.5
 
+# 亀戸駅前方面の停車順だけ
 ROUTE_STOP_ORDER = {
     "nishi25": [
-        "大島八丁目",
         "大島七丁目",
         "中の橋通り",
         "大島駅前",
@@ -36,6 +35,8 @@ ROUTE_STOP_ORDER = {
         "西大島駅前",
         "五ノ橋",
         "亀戸駅通り",
+        "亀戸六丁目",
+        "亀戸七丁目",
         "亀戸駅前",
     ],
     "nishi27": [
@@ -49,6 +50,8 @@ ROUTE_STOP_ORDER = {
         "西大島駅前",
         "五ノ橋",
         "亀戸駅通り",
+        "亀戸六丁目",
+        "亀戸七丁目",
         "亀戸駅前",
     ],
     "kame26": [
@@ -63,7 +66,7 @@ ROUTE_STOP_ORDER = {
         "城東特別支援学校前",
         "竪川大橋北詰",
         "亀戸六丁目",
-        "水神森",
+        "亀戸七丁目",
         "亀戸駅前",
     ],
 }
@@ -71,6 +74,7 @@ ROUTE_STOP_ORDER = {
 
 def distance_km(lat1, lon1, lat2, lon2):
     r = 6371.0
+
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
 
@@ -82,6 +86,7 @@ def distance_km(lat1, lon1, lat2, lon2):
     )
 
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
     return r * c
 
 
@@ -89,14 +94,20 @@ def get_route_key(route_id):
     for key, value in ROUTE_IDS.items():
         if value == route_id:
             return key
+
     return None
 
 
-def is_valid_stop_order(route_key, current_stop_name):
-    """
-    現在停留所が対象路線の停車順に含まれていればOK。
-    ただし、亀戸駅前は終点側なので除外。
-    """
+def get_stop_order_index(route_key, stop_name):
+    order = ROUTE_STOP_ORDER.get(route_key, [])
+
+    if stop_name not in order:
+        return None
+
+    return order.index(stop_name)
+
+
+def is_bus_before_target(route_key, current_stop_name):
     order = ROUTE_STOP_ORDER.get(route_key)
 
     if not order:
@@ -105,23 +116,27 @@ def is_valid_stop_order(route_key, current_stop_name):
     if current_stop_name not in order:
         return False
 
-    # 終点側は拾わない
-    if current_stop_name in ["亀戸駅前", "亀戸駅通り"]:
-        return False
+    current_index = order.index(current_stop_name)
+    target_index = order.index(TARGET_LOCATION["name"])
 
-    return True
+    # 亀戸七丁目より前、または亀戸七丁目停車中だけ表示
+    return current_index <= target_index
 
 
 def build_route_progress(route_key, current_stop_name):
     order = ROUTE_STOP_ORDER.get(route_key, [])
 
-    if not order or current_stop_name not in order:
+    if not order:
+        return []
+
+    if current_stop_name not in order:
         return []
 
     current_index = order.index(current_stop_name)
+    target_index = order.index(TARGET_LOCATION["name"])
 
     start = max(0, current_index - 2)
-    end = min(len(order), current_index + 5)
+    end = min(len(order), target_index + 2)
 
     result = []
 
@@ -131,8 +146,11 @@ def build_route_progress(route_key, current_stop_name):
         if i == current_index:
             role = "current"
 
-        if order[i] == TARGET_LOCATION["name"]:
+        if i == target_index:
             role = "target"
+
+        if current_index < i < target_index:
+            role = "between"
 
         result.append({
             "stop_name": order[i],
@@ -141,6 +159,28 @@ def build_route_progress(route_key, current_stop_name):
         })
 
     return result
+
+
+def make_status_text(route_key, current_stop_name):
+    order = ROUTE_STOP_ORDER.get(route_key, [])
+
+    if not order or current_stop_name not in order:
+        return "亀戸七丁目へ接近中"
+
+    current_index = order.index(current_stop_name)
+    target_index = order.index(TARGET_LOCATION["name"])
+    remaining = target_index - current_index
+
+    if remaining > 1:
+        return f"亀戸七丁目まであと{remaining}停留所"
+
+    if remaining == 1:
+        return "次は亀戸七丁目"
+
+    if remaining == 0:
+        return "亀戸七丁目に到着間近"
+
+    return "亀戸七丁目通過済み"
 
 
 def fetch_toei_realtime():
@@ -158,6 +198,7 @@ def fetch_toei_realtime():
             params={"acl:consumerKey": ODPT_API_KEY},
             timeout=15,
         )
+
         res.raise_for_status()
 
         feed = gtfs_realtime_pb2.FeedMessage()
@@ -191,16 +232,28 @@ def fetch_toei_realtime():
                 target_stop_name=TARGET_LOCATION["name"],
             )
 
-            current_stop_name = location.get("current_stop_name", "接近中")
+            current_stop_name = location.get(
+                "current_stop_name",
+                "接近中",
+            )
 
-            progress_stops = location.get("progress_stops", [])
-
-            # GTFSのprogressが怪しい時は、手動の停車順で上書き
             if route_key and current_stop_name in ROUTE_STOP_ORDER.get(route_key, []):
                 progress_stops = build_route_progress(
                     route_key,
                     current_stop_name,
                 )
+                status_text = make_status_text(
+                    route_key,
+                    current_stop_name,
+                )
+                remaining_stop_count = (
+                    ROUTE_STOP_ORDER[route_key].index(TARGET_LOCATION["name"])
+                    - ROUTE_STOP_ORDER[route_key].index(current_stop_name)
+                )
+            else:
+                progress_stops = location.get("progress_stops", [])
+                status_text = location.get("status_text", "亀戸七丁目へ接近中")
+                remaining_stop_count = location.get("remaining_stop_count")
 
             item = {
                 "entity_id": entity.id,
@@ -211,9 +264,9 @@ def fetch_toei_realtime():
                 "route_label": get_route_label(route_key) if route_key else "",
                 "stop_id": stop_id,
                 "current_stop_name": current_stop_name,
-                "direction": get_direction_label(trip_id),
-                "status_text": f"{TARGET_LOCATION['name']}へ接近中",
-                "remaining_stop_count": None,
+                "direction": "亀戸駅前方面",
+                "status_text": status_text,
+                "remaining_stop_count": remaining_stop_count,
                 "progress_stops": progress_stops,
                 "passed_target": False,
                 "latitude": lat,
@@ -243,6 +296,7 @@ def fetch_toei_realtime():
 
     except Exception as e:
         print("REALTIME FETCH ERROR =", str(e))
+
         return {
             "ok": False,
             "reason": str(e),
@@ -274,7 +328,7 @@ def get_realtime_buses():
         if route_key not in ROUTE_STOP_ORDER:
             continue
 
-        if not is_valid_stop_order(route_key, current_stop_name):
+        if not is_bus_before_target(route_key, current_stop_name):
             continue
 
         if v.get("distance_km") is None:
@@ -287,8 +341,12 @@ def get_realtime_buses():
 
     buses.sort(
         key=lambda x: (
-            x.get("distance_km") if x.get("distance_km") is not None else 999,
-            x.get("route_label", ""),
+            x.get("remaining_stop_count")
+            if x.get("remaining_stop_count") is not None
+            else 999,
+            x.get("distance_km")
+            if x.get("distance_km") is not None
+            else 999,
         )
     )
 
