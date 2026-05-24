@@ -177,10 +177,6 @@ def get_realtime_buses():
         if v["distance_km"] > SEARCH_RADIUS_KM:
             continue
 
-        # 亀戸駅前方面だけ
-        if "亀戸駅前方面" not in v.get("direction", ""):
-            continue
-
         # 亀戸七丁目をこれから通る便だけ
         if not is_before_or_at_target_stop(
             trip_id=v.get("trip_id", ""),
