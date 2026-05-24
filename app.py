@@ -11,6 +11,7 @@ from gtfs_utils import (
     get_direction_label,
     get_bus_location_status,
     get_debug_status,
+    is_before_or_at_target_stop,
 )
 
 app = Flask(__name__)
@@ -49,6 +50,7 @@ def get_route_key(route_id):
     for key, value in ROUTE_IDS.items():
         if value == route_id:
             return key
+
     return None
 
 
@@ -165,6 +167,7 @@ def get_realtime_buses():
     buses = []
 
     for v in realtime["vehicles"]:
+
         if not v.get("route_key"):
             continue
 
@@ -172,6 +175,22 @@ def get_realtime_buses():
             continue
 
         if v["distance_km"] > SEARCH_RADIUS_KM:
+            continue
+
+        # 亀戸駅前方面だけ
+        if "亀戸駅前方面" not in v.get("direction", ""):
+            continue
+
+        # 亀戸七丁目をこれから通る便だけ
+        if not is_before_or_at_target_stop(
+            trip_id=v.get("trip_id", ""),
+            current_stop_id=v.get("stop_id", ""),
+            target_stop_name=TARGET_LOCATION["name"],
+        ):
+            continue
+
+        # 亀戸七丁目を通過済みなら除外
+        if v.get("passed_target"):
             continue
 
         buses.append(v)
