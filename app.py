@@ -25,49 +25,43 @@ TARGET_LOCATION = {
 
 SEARCH_RADIUS_KM = 3.5
 
-# 亀戸駅前方面の停車順だけ
+# 亀戸七丁目付近だけ監視
 ROUTE_STOP_ORDER = {
+
+    # 錦25
     "nishi25": [
-        "大島七丁目",
-        "中の橋通り",
-        "大島駅前",
-        "大島三丁目",
-        "西大島駅前",
-        "五ノ橋",
-        "亀戸駅通り",
-        "亀戸六丁目",
+        "小松川三丁目",
+        "中川新橋",
+
+        "浅間神社",
+        "浅間神社(江東区)",
+
+        "亀戸九丁目",
         "亀戸七丁目",
-        "亀戸駅前",
     ],
+
+    # 錦27
     "nishi27": [
-        "旧葛西橋",
-        "東砂四丁目",
-        "亀高橋",
-        "北砂四丁目",
-        "境川",
-        "北砂二丁目",
-        "大島一丁目",
-        "西大島駅前",
-        "五ノ橋",
-        "亀戸駅通り",
-        "亀戸六丁目",
+        "小松川三丁目",
+        "中川新橋",
+
+        "浅間神社",
+        "浅間神社(江東区)",
+
+        "亀戸九丁目",
         "亀戸七丁目",
-        "亀戸駅前",
     ],
+
+    # 亀26
     "kame26": [
-        "旧葛西橋",
-        "東砂四丁目",
-        "亀高橋",
-        "北砂七丁目",
-        "北砂五丁目",
-        "北砂六丁目",
-        "大島五丁目",
-        "大島駅前",
-        "城東特別支援学校前",
-        "竪川大橋北詰",
-        "亀戸六丁目",
+        "小松川三丁目",
+        "中川新橋",
+
+        "浅間神社",
+        "浅間神社(江東区)",
+
+        "亀戸九丁目",
         "亀戸七丁目",
-        "亀戸駅前",
     ],
 }
 
@@ -98,62 +92,31 @@ def get_route_key(route_id):
     return None
 
 
-def get_stop_order_index(route_key, stop_name):
-    order = ROUTE_STOP_ORDER.get(route_key, [])
-
-    if stop_name not in order:
-        return None
-
-    return order.index(stop_name)
-
-
-def is_bus_before_target(route_key, current_stop_name):
+def is_valid_bus(route_key, current_stop_name):
     order = ROUTE_STOP_ORDER.get(route_key)
 
     if not order:
         return False
 
-    if current_stop_name not in order:
-        return False
-
-    current_index = order.index(current_stop_name)
-    target_index = order.index(TARGET_LOCATION["name"])
-
-    # 亀戸七丁目より前、または亀戸七丁目停車中だけ表示
-    return current_index <= target_index
+    return current_stop_name in order
 
 
-def build_route_progress(route_key, current_stop_name):
+def build_progress(route_key, current_stop_name):
     order = ROUTE_STOP_ORDER.get(route_key, [])
-
-    if not order:
-        return []
-
-    if current_stop_name not in order:
-        return []
-
-    current_index = order.index(current_stop_name)
-    target_index = order.index(TARGET_LOCATION["name"])
-
-    start = max(0, current_index - 2)
-    end = min(len(order), target_index + 2)
 
     result = []
 
-    for i in range(start, end):
+    for stop in order:
         role = "normal"
 
-        if i == current_index:
+        if stop == current_stop_name:
             role = "current"
 
-        if i == target_index:
+        if stop == TARGET_LOCATION["name"]:
             role = "target"
 
-        if current_index < i < target_index:
-            role = "between"
-
         result.append({
-            "stop_name": order[i],
+            "stop_name": stop,
             "stop_id": "",
             "role": role,
         })
@@ -164,11 +127,21 @@ def build_route_progress(route_key, current_stop_name):
 def make_status_text(route_key, current_stop_name):
     order = ROUTE_STOP_ORDER.get(route_key, [])
 
-    if not order or current_stop_name not in order:
+    if current_stop_name not in order:
         return "亀戸七丁目へ接近中"
 
     current_index = order.index(current_stop_name)
-    target_index = order.index(TARGET_LOCATION["name"])
+
+    target_candidates = [
+        i for i, stop in enumerate(order)
+        if stop == TARGET_LOCATION["name"]
+    ]
+
+    if not target_candidates:
+        return "亀戸七丁目へ接近中"
+
+    target_index = target_candidates[0]
+
     remaining = target_index - current_index
 
     if remaining > 1:
@@ -178,7 +151,7 @@ def make_status_text(route_key, current_stop_name):
         return "次は亀戸七丁目"
 
     if remaining == 0:
-        return "亀戸七丁目に到着間近"
+        return "亀戸七丁目付近"
 
     return "亀戸七丁目通過済み"
 
@@ -207,6 +180,7 @@ def fetch_toei_realtime():
         vehicles = []
 
         for entity in feed.entity:
+
             if not entity.HasField("vehicle"):
                 continue
 
@@ -237,23 +211,19 @@ def fetch_toei_realtime():
                 "接近中",
             )
 
-            if route_key and current_stop_name in ROUTE_STOP_ORDER.get(route_key, []):
-                progress_stops = build_route_progress(
+            progress_stops = []
+            status_text = "亀戸七丁目へ接近中"
+
+            if route_key:
+                progress_stops = build_progress(
                     route_key,
                     current_stop_name,
                 )
+
                 status_text = make_status_text(
                     route_key,
                     current_stop_name,
                 )
-                remaining_stop_count = (
-                    ROUTE_STOP_ORDER[route_key].index(TARGET_LOCATION["name"])
-                    - ROUTE_STOP_ORDER[route_key].index(current_stop_name)
-                )
-            else:
-                progress_stops = location.get("progress_stops", [])
-                status_text = location.get("status_text", "亀戸七丁目へ接近中")
-                remaining_stop_count = location.get("remaining_stop_count")
 
             item = {
                 "entity_id": entity.id,
@@ -264,9 +234,9 @@ def fetch_toei_realtime():
                 "route_label": get_route_label(route_key) if route_key else "",
                 "stop_id": stop_id,
                 "current_stop_name": current_stop_name,
-                "direction": "亀戸駅前方面",
+                "direction": "亀戸七丁目方面",
                 "status_text": status_text,
-                "remaining_stop_count": remaining_stop_count,
+                "remaining_stop_count": None,
                 "progress_stops": progress_stops,
                 "passed_target": False,
                 "latitude": lat,
@@ -319,6 +289,7 @@ def get_realtime_buses():
     buses = []
 
     for v in realtime["vehicles"]:
+
         route_key = v.get("route_key")
         current_stop_name = v.get("current_stop_name", "")
 
@@ -328,7 +299,7 @@ def get_realtime_buses():
         if route_key not in ROUTE_STOP_ORDER:
             continue
 
-        if not is_bus_before_target(route_key, current_stop_name):
+        if not is_valid_bus(route_key, current_stop_name):
             continue
 
         if v.get("distance_km") is None:
@@ -341,12 +312,9 @@ def get_realtime_buses():
 
     buses.sort(
         key=lambda x: (
-            x.get("remaining_stop_count")
-            if x.get("remaining_stop_count") is not None
-            else 999,
             x.get("distance_km")
             if x.get("distance_km") is not None
-            else 999,
+            else 999
         )
     )
 
@@ -365,6 +333,7 @@ def index():
 
 @app.route("/api/realtime")
 def realtime_api():
+
     result = get_realtime_buses()
 
     return jsonify({
@@ -377,6 +346,7 @@ def realtime_api():
 
 @app.route("/api/realtime-debug")
 def realtime_debug():
+
     realtime = fetch_toei_realtime()
     result = get_realtime_buses()
 
