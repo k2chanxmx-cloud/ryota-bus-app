@@ -26,7 +26,7 @@ TARGET_LOCATION = {
 
 SEARCH_RADIUS_KM = 3.5
 
-ROUTE_STOP_WHITELIST = {
+ROUTE_STOP_ORDER = {
     "nishi25": [
         "大島八丁目",
         "大島七丁目",
@@ -92,6 +92,57 @@ def get_route_key(route_id):
     return None
 
 
+def is_valid_stop_order(route_key, current_stop_name):
+    """
+    現在停留所が対象路線の停車順に含まれていればOK。
+    ただし、亀戸駅前は終点側なので除外。
+    """
+    order = ROUTE_STOP_ORDER.get(route_key)
+
+    if not order:
+        return False
+
+    if current_stop_name not in order:
+        return False
+
+    # 終点側は拾わない
+    if current_stop_name in ["亀戸駅前", "亀戸駅通り"]:
+        return False
+
+    return True
+
+
+def build_route_progress(route_key, current_stop_name):
+    order = ROUTE_STOP_ORDER.get(route_key, [])
+
+    if not order or current_stop_name not in order:
+        return []
+
+    current_index = order.index(current_stop_name)
+
+    start = max(0, current_index - 2)
+    end = min(len(order), current_index + 5)
+
+    result = []
+
+    for i in range(start, end):
+        role = "normal"
+
+        if i == current_index:
+            role = "current"
+
+        if order[i] == TARGET_LOCATION["name"]:
+            role = "target"
+
+        result.append({
+            "stop_name": order[i],
+            "stop_id": "",
+            "role": role,
+        })
+
+    return result
+
+
 def fetch_toei_realtime():
     if not ODPT_API_KEY:
         return {
@@ -140,6 +191,17 @@ def fetch_toei_realtime():
                 target_stop_name=TARGET_LOCATION["name"],
             )
 
+            current_stop_name = location.get("current_stop_name", "接近中")
+
+            progress_stops = location.get("progress_stops", [])
+
+            # GTFSのprogressが怪しい時は、手動の停車順で上書き
+            if route_key and current_stop_name in ROUTE_STOP_ORDER.get(route_key, []):
+                progress_stops = build_route_progress(
+                    route_key,
+                    current_stop_name,
+                )
+
             item = {
                 "entity_id": entity.id,
                 "vehicle_id": vehicle_id,
@@ -148,12 +210,12 @@ def fetch_toei_realtime():
                 "route_key": route_key,
                 "route_label": get_route_label(route_key) if route_key else "",
                 "stop_id": stop_id,
-                "current_stop_name": location.get("current_stop_name", "接近中"),
+                "current_stop_name": current_stop_name,
                 "direction": get_direction_label(trip_id),
-                "status_text": location.get("status_text", "接近中"),
-                "remaining_stop_count": location.get("remaining_stop_count"),
-                "progress_stops": location.get("progress_stops", []),
-                "passed_target": location.get("passed_target", False),
+                "status_text": f"{TARGET_LOCATION['name']}へ接近中",
+                "remaining_stop_count": None,
+                "progress_stops": progress_stops,
+                "passed_target": False,
                 "latitude": lat,
                 "longitude": lon,
                 "distance_km": None,
@@ -209,10 +271,10 @@ def get_realtime_buses():
         if not route_key:
             continue
 
-        if route_key not in ROUTE_STOP_WHITELIST:
+        if route_key not in ROUTE_STOP_ORDER:
             continue
 
-        if current_stop_name not in ROUTE_STOP_WHITELIST[route_key]:
+        if not is_valid_stop_order(route_key, current_stop_name):
             continue
 
         if v.get("distance_km") is None:
@@ -273,7 +335,7 @@ def realtime_debug():
             "longitude": TARGET_LOCATION["longitude"],
             "search_radius_km": SEARCH_RADIUS_KM,
         },
-        "whitelist": ROUTE_STOP_WHITELIST,
+        "route_stop_order": ROUTE_STOP_ORDER,
     })
 
 
